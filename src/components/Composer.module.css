@@ -1,0 +1,256 @@
+.dock {
+  flex: none;
+  padding: 6px 16px 14px;
+  padding-bottom: max(14px, env(safe-area-inset-bottom));
+}
+.inner {
+  position: relative;
+  max-width: 780px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: end;
+  gap: 8px;
+  padding: 0 9px;
+}
+.errors {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px 8px 8px 14px;
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: var(--shadow-bubble);
+  color: var(--danger);
+  font-family: var(--sans);
+  font-size: 0.8125rem;
+}
+.errors ul {
+  flex: 1;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.errors button {
+  color: var(--text-3);
+  padding: 2px;
+}
+.box {
+  min-width: 0;
+  border-radius: 18px;
+  background: var(--surface);
+  box-shadow: var(--shadow-bubble);
+  overflow: hidden;
+  outline: 2px solid transparent;
+  transition: outline-color 0.15s;
+}
+.box:has(.input:focus-visible) {
+  outline-color: color-mix(in srgb, var(--primary) 45%, transparent);
+}
+.input:focus-visible {
+  outline: none;
+}
+.row {
+  display: flex;
+  align-items: flex-end;
+}
+.attach {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 52px;
+  color: var(--text-3);
+  transition: color 0.12s;
+}
+.attach:hover {
+  color: var(--primary);
+}
+.input {
+  flex: 1;
+  min-width: 0;
+  min-height: 52px;
+  max-height: 200px;
+  padding: 14px 16px 14px 0;
+  border: 0;
+  outline: none;
+  resize: none;
+  background: transparent;
+  font-family: var(--serif);
+  font-size: 1rem;
+  line-height: 1.5;
+  scrollbar-width: thin;
+}
+.input::placeholder {
+  color: var(--text-3);
+}
+.send {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: var(--on-primary);
+  box-shadow: var(--shadow-bubble);
+  transition: background 0.15s, transform 0.15s, opacity 0.15s;
+}
+.send:hover:not(:disabled) {
+  background: var(--primary-hover);
+}
+.send:active:not(:disabled) {
+  transform: scale(0.94);
+}
+.send:disabled {
+  background: var(--surface);
+  color: var(--text-3);
+  cursor: default;
+}
+.send svg {
+  margin-left: 2px;
+}
+
+.tray {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 10px 10px 2px;
+  list-style: none;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 10px;
+}
+.att {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-radius: 12px;
+  background: var(--surface-2);
+}
+.att[data-kind='image'],
+.att[data-kind='video'] {
+  width: 76px;
+  height: 76px;
+  overflow: hidden;
+}
+.thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.att[data-kind='audio'],
+.att[data-kind='other'] {
+  max-width: 260px;
+  padding: 8px 34px 8px 8px;
+}
+.attIcon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: var(--on-primary);
+}
+.attText {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.attName {
+  font-weight: 700;
+  font-size: 0.875rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.attSub {
+  font-family: var(--sans);
+  font-size: 0.75rem;
+  color: var(--text-3);
+}
+.attRemove {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+}
+
+@media (max-width: 720px) {
+  .dock {
+    padding: 4px 6px 8px;
+    padding-bottom: max(8px, env(safe-area-inset-bottom));
+  }
+  .inner {
+    gap: 6px;
+    padding: 0;
+  }
+  .send {
+    width: 48px;
+    height: 48px;
+  }
+}
+
+/* режим редактирования */
+.editBar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 8px 8px 14px;
+  border-bottom: 1px solid var(--line);
+}
+.editIcon {
+  flex: none;
+  color: var(--primary);
+}
+.editText {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  padding-left: 10px;
+  border-left: 2px solid var(--primary);
+  font-family: var(--sans);
+  line-height: 1.35;
+}
+.editTitle {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--primary);
+}
+.editSnippet {
+  font-size: 0.8125rem;
+  color: var(--text-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.editCancel {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  color: var(--text-3);
+}
+.editCancel:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+.attachPlaceholder {
+  flex: none;
+  width: 16px;
+}
+.send[data-mode='edit'] svg {
+  margin-left: 0;
+}

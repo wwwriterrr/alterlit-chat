@@ -1,0 +1,47 @@
+.root {
+  height: 100%;
+  display: grid;
+  place-items: center;
+}
+.mark {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2.5px solid var(--primary);
+  border-right-color: transparent;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.card {
+  max-width: 340px;
+  margin: 16px;
+  padding: 24px;
+  border-radius: 16px;
+  background: var(--surface);
+  box-shadow: var(--shadow-pop);
+  text-align: center;
+}
+.title {
+  margin: 0 0 6px;
+  font-weight: 700;
+  font-size: 1.125rem;
+}
+.text {
+  margin: 0 0 16px;
+  font-family: var(--sans);
+  font-size: 0.875rem;
+  color: var(--text-2);
+}
+.retry {
+  padding: 10px 22px;
+  border-radius: 20px;
+  background: var(--primary);
+  color: var(--on-primary);
+  font-family: var(--sans);
+  font-weight: 600;
+}

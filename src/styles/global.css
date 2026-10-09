@@ -1,0 +1,304 @@
+/* Цвета взяты с alterlit.ru: хвоя #254F23 / #20301A, янтарь #E9AA44, серый #D7D7D7 */
+:root {
+  --serif: 'PT Serif', Georgia, 'Times New Roman', serif;
+  --sans: 'Open Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  --forest: #254f23;
+  --pine: #20301a;
+  --amber: #e9aa44;
+
+  --bg-app: #ffffff;
+  --bg-chat: #e3e7d4;
+  --pattern: rgba(37, 79, 35, 0.11);
+  --surface: #ffffff;
+  --surface-2: #f2f3ee;
+  --surface-3: #e8eae2;
+  --line: #e2e3dc;
+  --text: #1c2818;
+  --text-2: #636b5e;
+  --text-3: #959b8f;
+  --primary: #254f23;
+  --primary-hover: #1b3d19;
+  --on-primary: #ffffff;
+  --accent: #e9aa44;
+  --on-accent: #20301a;
+  --muted-badge: #b3b8ac;
+  --selected: #254f23;
+  --on-selected: #ffffff;
+  --bubble-in: #ffffff;
+  --bubble-out: #dcebc9;
+  --meta-in: #959b8f;
+  --meta-out: #4f7a43;
+  --link: #2c6b29;
+  --danger: #c0443f;
+  --focus: #e9aa44;
+  --shadow-bubble: 0 1px 1px rgba(32, 48, 26, 0.13);
+  --shadow-pop: 0 10px 30px rgba(32, 48, 26, 0.18), 0 2px 6px rgba(32, 48, 26, 0.1);
+  --date-chip: rgba(37, 79, 35, 0.55);
+  /* обои: базовые цвета, из которых собраны все варианты */
+  --wp-base: #dbe3cb;
+  --wp-sage: #c4d8ba;
+  --wp-haze: #f0dcaa;
+  --wp-mist: #eef1e2;
+  --wp-paper: #eef0e5;
+  --wp-ink: rgba(37, 79, 35, 0.12);
+  --wp-ink-soft: rgba(37, 79, 35, 0.085);
+  --wp-rule: rgba(37, 79, 35, 0.085);
+  --wp-margin: rgba(214, 140, 30, 0.5);
+  --wp-grain: 0.35;
+
+  --sidebar-w: 360px;
+  --header-h: 56px;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --bg-app: #172013;
+    --bg-chat: #0f150c;
+    --pattern: rgba(233, 170, 68, 0.06);
+    --surface: #1c2618;
+    --surface-2: #243020;
+    --surface-3: #2c3a27;
+    --line: #2a3625;
+    --text: #e7ebe1;
+    --text-2: #9ca694;
+    --text-3: #6f7a68;
+    --primary: #4c8c40;
+    --primary-hover: #57a04a;
+    --on-primary: #ffffff;
+    --muted-badge: #4a5644;
+    --selected: #2f5a29;
+    --on-selected: #ffffff;
+    --bubble-in: #1f2a1b;
+    --bubble-out: #2e4d27;
+    --meta-in: #7f8a78;
+    --meta-out: #9fc58f;
+    --link: #8fcf7c;
+    --danger: #e0716b;
+    --shadow-bubble: 0 1px 1px rgba(0, 0, 0, 0.35);
+    --shadow-pop: 0 12px 32px rgba(0, 0, 0, 0.5);
+    --date-chip: rgba(28, 38, 24, 0.85);
+    --wp-base: #0e150c;
+    --wp-sage: #183019;
+    --wp-haze: #24391d;
+    --wp-mist: #121b10;
+    --wp-paper: #141a12;
+    --wp-ink: rgba(233, 170, 68, 0.085);
+    --wp-ink-soft: rgba(233, 170, 68, 0.06);
+    --wp-rule: rgba(231, 235, 225, 0.05);
+    --wp-margin: rgba(233, 170, 68, 0.3);
+    --wp-grain: 0.22;
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme='dark'] {
+  --bg-app: #172013;
+  --bg-chat: #0f150c;
+  --pattern: rgba(233, 170, 68, 0.06);
+  --surface: #1c2618;
+  --surface-2: #243020;
+  --surface-3: #2c3a27;
+  --line: #2a3625;
+  --text: #e7ebe1;
+  --text-2: #9ca694;
+  --text-3: #6f7a68;
+  --primary: #4c8c40;
+  --primary-hover: #57a04a;
+  --on-primary: #ffffff;
+  --muted-badge: #4a5644;
+  --selected: #2f5a29;
+  --on-selected: #ffffff;
+  --bubble-in: #1f2a1b;
+  --bubble-out: #2e4d27;
+  --meta-in: #7f8a78;
+  --meta-out: #9fc58f;
+  --link: #8fcf7c;
+  --danger: #e0716b;
+  --shadow-bubble: 0 1px 1px rgba(0, 0, 0, 0.35);
+  --shadow-pop: 0 12px 32px rgba(0, 0, 0, 0.5);
+  --date-chip: rgba(28, 38, 24, 0.85);
+  --wp-base: #0e150c;
+  --wp-sage: #183019;
+  --wp-haze: #24391d;
+  --wp-mist: #121b10;
+  --wp-paper: #141a12;
+  --wp-ink: rgba(233, 170, 68, 0.085);
+  --wp-ink-soft: rgba(233, 170, 68, 0.06);
+  --wp-rule: rgba(231, 235, 225, 0.05);
+  --wp-margin: rgba(233, 170, 68, 0.3);
+  --wp-grain: 0.22;
+  color-scheme: dark;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg-app);
+  color: var(--text);
+  font-family: var(--serif);
+  font-size: 16px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+  background: none;
+  border: 0;
+  padding: 0;
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* ── Обои чата ──────────────────────────────────────────────────────────────
+   Вариант выбирается атрибутом data-wp (на :root или на превью в меню).
+   Каждый вариант только задаёт переменные; цвета берутся из --wp-* темы,
+   поэтому все обои сами подстраиваются под светлую и тёмную тему.
+   Слои: фон (--wp-bg) → узор-маска (::before) → зерно бумаги (::after). */
+:root {
+  --wp-doodle: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200' fill='none' stroke='%23000' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M18 40c7-4 14-4 19 0 5-4 12-4 19 0V20c-7-4-14-4-19 0-5-4-12-4-19 0zM37 20v20'/%3E%3Cpath d='M160 14c-14 2-25 13-30 34M160 14c-2 14-12 23-25 25M130 48l-3 6'/%3E%3Cpath d='M86 92c-6 8-9 12-9 17a9 9 0 0 0 18 0c0-5-3-9-9-17z'/%3E%3Cpath d='M28 140l-7 7 7 7M37 140l-7 7 7 7'/%3E%3Cpath d='M164 120v14M158 123.5l12 7M158 130.5l12-7'/%3E%3Cpath d='M120 170l7-7-7-7M111 170l7-7-7-7'/%3E%3Ccircle cx='70' cy='176' r='2'/%3E%3Ccircle cx='182' cy='76' r='2'/%3E%3Ccircle cx='108' cy='30' r='1.5'/%3E%3Cpath d='M44 88l-8 18M40 92l8 2'/%3E%3C/svg%3E");
+  --wp-noise: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5 0 0 0 0 .5 0 0 0 0 .5 0 0 0 1.4 -.35'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  --wp-step-pos: 0% 0%;
+}
+:root[data-wp-step='1'] { --wp-step-pos: 100% 0%; }
+:root[data-wp-step='2'] { --wp-step-pos: 100% 100%; }
+:root[data-wp-step='3'] { --wp-step-pos: 0% 100%; }
+
+/* Перья — исходный узор на ровном фоне */
+:root,
+[data-wp='feathers'] {
+  --wp-bg: var(--bg-chat);
+  --wp-bg-size: auto;
+  --wp-bg-pos: 0 0;
+  --wp-pattern: var(--wp-doodle);
+  --wp-pattern-size: 200px;
+  --wp-pattern-color: var(--pattern);
+  --wp-grain-opacity: 0;
+}
+
+/* Сад — мягкий градиент хвоя/шалфей/янтарь, смещается на новое сообщение */
+[data-wp='garden'] {
+  --wp-bg:
+    radial-gradient(circle at 18% 22%, var(--wp-haze) 0, transparent 42%),
+    radial-gradient(circle at 82% 18%, var(--wp-sage) 0, transparent 46%),
+    radial-gradient(circle at 78% 82%, var(--wp-haze) 0, transparent 40%),
+    radial-gradient(circle at 22% 80%, var(--wp-sage) 0, transparent 48%),
+    var(--wp-base);
+  --wp-bg-size: 170% 170%;
+  --wp-bg-pos: var(--wp-step-pos);
+  --wp-pattern: var(--wp-doodle);
+  --wp-pattern-size: 240px;
+  --wp-pattern-color: var(--wp-ink);
+  --wp-grain-opacity: var(--wp-grain);
+}
+
+/* Рукопись — дореформенные буквы и знаки курсивом PT Serif */
+[data-wp='manuscript'] {
+  --wp-bg:
+    radial-gradient(ellipse at 50% 0%, var(--wp-mist) 0, transparent 70%),
+    var(--wp-paper);
+  --wp-bg-size: auto;
+  --wp-bg-pos: 0 0;
+  --wp-pattern: var(--wp-glyphs, none);
+  --wp-pattern-size: 420px;
+  --wp-pattern-color: var(--wp-ink-soft);
+  --wp-grain-opacity: var(--wp-grain);
+}
+
+/* Тетрадь — линовка, янтарная линия полей и зерно бумаги */
+[data-wp='notebook'] {
+  --wp-margin-x: clamp(20px, 6%, 64px);
+  --wp-bg:
+    linear-gradient(90deg, transparent var(--wp-margin-x), var(--wp-margin) var(--wp-margin-x),
+      var(--wp-margin) calc(var(--wp-margin-x) + 1.5px), transparent calc(var(--wp-margin-x) + 1.5px)),
+    repeating-linear-gradient(180deg, transparent 0 31px, var(--wp-rule) 31px 32px),
+    var(--wp-paper);
+  --wp-bg-size: auto;
+  --wp-bg-pos: 0 0;
+  --wp-pattern: none;
+  --wp-pattern-size: auto;
+  --wp-pattern-color: transparent;
+  --wp-grain-opacity: calc(var(--wp-grain) * 1.6);
+}
+
+/* Лавр — тонкие ветви, крупный редкий узор на вертикальном градиенте */
+[data-wp='laurel'] {
+  --wp-bg: linear-gradient(165deg, var(--wp-mist) 0%, var(--wp-base) 55%, var(--wp-sage) 100%);
+  --wp-bg-size: auto;
+  --wp-bg-pos: 0 0;
+  --wp-pattern: var(--wp-laurel, none);
+  --wp-pattern-size: 320px;
+  --wp-pattern-color: var(--wp-ink);
+  --wp-grain-opacity: var(--wp-grain);
+}
+
+.chat-wallpaper {
+  position: relative;
+  isolation: isolate;
+  background: var(--wp-bg);
+  background-size: var(--wp-bg-size);
+  background-position: var(--wp-bg-pos);
+  transition: background-position 0.9s cubic-bezier(0.3, 0.7, 0.3, 1);
+}
+.chat-wallpaper::before,
+.chat-wallpaper::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+.chat-wallpaper::before {
+  background-color: var(--wp-pattern-color);
+  -webkit-mask-image: var(--wp-pattern);
+  mask-image: var(--wp-pattern);
+  -webkit-mask-size: calc(var(--wp-pattern-size) * var(--wp-scale, 1));
+  mask-size: calc(var(--wp-pattern-size) * var(--wp-scale, 1));
+}
+.chat-wallpaper::after {
+  background-image: var(--wp-noise);
+  opacity: var(--wp-grain-opacity);
+  mix-blend-mode: overlay;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

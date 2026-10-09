@@ -1,0 +1,14 @@
+.avatar {
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 50%;
+  color: #fff;
+  font-family: var(--serif);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  user-select: none;
+}
+img.avatar {
+  object-fit: cover;
+}

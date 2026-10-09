@@ -1,0 +1,35 @@
+{% comment %}
+  Шаблон страницы чата (SPA). Статика сборки лежит в /assets/chat_legacy/:
+  chat.js и chat.css — постоянные имена, chunks/* подгружаются сами.
+  data-base — URL, на котором смонтирован чат; всё, что глубже
+  (<base>room/36/, <base>dialog/12/), должно отдавать этот же шаблон.
+{% endcomment %}
+{% load static %}
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#254F23" />
+    <title>Сообщения — Alterlit</title>
+    <link rel="icon" href="/assets/chat_legacy/favicon.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&family=PT+Serif:ital,wght@0,400;0,700;1,400&display=swap&subset=cyrillic"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/assets/chat_legacy/chat.css" />
+    <script>
+      try {
+        var t = localStorage.getItem('alterlit-chat-theme');
+        if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t;
+      } catch (e) {}
+    </script>
+  </head>
+  <body>
+    {% csrf_token %}
+    <div id="root" data-base="/messenger/"></div>
+    <script type="module" src="/assets/chat_legacy/chat.js"></script>
+  </body>
+</html>

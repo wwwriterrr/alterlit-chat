@@ -1,0 +1,18 @@
+.root {
+  flex: 1;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+}
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px;
+  border-radius: 18px;
+  background: var(--date-chip);
+  color: #fff;
+  font-family: var(--sans);
+  font-size: 0.875rem;
+  text-align: center;
+}

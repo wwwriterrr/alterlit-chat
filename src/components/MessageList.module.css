@@ -1,0 +1,134 @@
+.wrap {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.scroller {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column-reverse;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+.column {
+  width: 100%;
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 8px 16px 10px;
+  display: flex;
+  flex-direction: column;
+}
+.day {
+  display: flex;
+  flex-direction: column;
+}
+.dayHead {
+  position: sticky;
+  top: 8px;
+  z-index: 2;
+  display: flex;
+  justify-content: center;
+  margin: 10px 0 8px;
+  pointer-events: none;
+}
+.chip {
+  display: inline-block;
+  padding: 3px 11px;
+  border-radius: 14px;
+  background: var(--date-chip);
+  color: #fff;
+  font-family: var(--sans);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.5;
+  backdrop-filter: blur(6px);
+  pointer-events: auto;
+}
+.chipBtn {
+  margin-left: 6px;
+  color: var(--amber);
+  font-weight: 600;
+  text-decoration: underline;
+}
+.center {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 0;
+  text-align: center;
+}
+.center .chip {
+  font-weight: 400;
+  padding: 8px 14px;
+  max-width: 320px;
+}
+.loader {
+  align-self: center;
+  width: 22px;
+  height: 22px;
+  margin: 14px 0;
+  border-radius: 50%;
+  border: 2.5px solid var(--primary);
+  border-right-color: transparent;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.down {
+  position: absolute;
+  right: 20px;
+  bottom: 14px;
+  z-index: 6;
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: var(--surface);
+  color: var(--text-2);
+  box-shadow: var(--shadow-pop);
+  animation: appear 0.16s ease-out;
+}
+.down:hover {
+  color: var(--primary);
+}
+@keyframes appear {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+.downBadge {
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 11px;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-family: var(--sans);
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 22px;
+  text-align: center;
+}
+@media (max-width: 720px) {
+  .column {
+    padding: 6px 8px 8px;
+  }
+  .down {
+    right: 12px;
+  }
+}
