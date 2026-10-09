@@ -23,8 +23,11 @@
   --accent: #e9aa44;
   --on-accent: #20301a;
   --muted-badge: #b3b8ac;
-  --selected: #254f23;
-  --on-selected: #ffffff;
+  /* активный чат — тон фона переписки, а не сплошная хвоя: не перетягивает внимание */
+  --selected: #dfe8d8;
+  --on-selected: var(--text);
+  --selected-meta: var(--text-2);
+  --selected-mark: transparent;
   --bubble-in: #ffffff;
   --bubble-out: #dcebc9;
   --meta-in: #959b8f;
@@ -70,6 +73,8 @@
     --muted-badge: #4a5644;
     --selected: #2f5a29;
     --on-selected: #ffffff;
+    --selected-meta: rgba(255, 255, 255, 0.78);
+    --selected-mark: transparent;
     --bubble-in: #1f2a1b;
     --bubble-out: #2e4d27;
     --meta-in: #7f8a78;
@@ -110,6 +115,8 @@
   --muted-badge: #4a5644;
   --selected: #2f5a29;
   --on-selected: #ffffff;
+  --selected-meta: rgba(255, 255, 255, 0.78);
+  --selected-mark: transparent;
   --bubble-in: #1f2a1b;
   --bubble-out: #2e4d27;
   --meta-in: #7f8a78;

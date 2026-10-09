@@ -22,8 +22,11 @@
     <link rel="stylesheet" href="/assets/chat_legacy/chat.css" />
     <script>
       try {
+        // тема и обои — до загрузки скрипта, чтобы не мигали
         var t = localStorage.getItem('alterlit-chat-theme');
         if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t;
+        var w = localStorage.getItem('alterlit-chat-wallpaper');
+        if (w) document.documentElement.dataset.wp = w;
       } catch (e) {}
     </script>
   </head>

@@ -16,6 +16,7 @@
 .item[data-active] {
   background: var(--selected);
   color: var(--on-selected);
+  box-shadow: inset 3px 0 0 var(--selected-mark);
 }
 .body {
   flex: 1;
@@ -74,5 +75,5 @@
 .item[data-active] .date,
 .item[data-active] .preview,
 .item[data-active] .typing {
-  color: color-mix(in srgb, var(--on-selected) 78%, transparent);
+  color: var(--selected-meta);
 }
