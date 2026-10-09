@@ -40,6 +40,8 @@ const uiSlice = createSlice({
     toast: null as Toast | null,
     /** id чата, для которого открыт диалог «Удалить чат?» */
     confirmDeleteRoom: null as number | null,
+    /** панель «Новый чат» вместо списка диалогов */
+    newChatOpen: false,
   },
   reducers: {
     showToast: {
@@ -49,6 +51,9 @@ const uiSlice = createSlice({
       prepare(text: string, toastAction?: ToastAction) {
         return { payload: { text, action: toastAction } };
       },
+    },
+    setNewChatOpen(state, action: PayloadAction<boolean>) {
+      state.newChatOpen = action.payload;
     },
     askDeleteRoom(state, action: PayloadAction<number | null>) {
       state.confirmDeleteRoom = action.payload;
@@ -76,5 +81,5 @@ const uiSlice = createSlice({
   },
 });
 
-export const { setTheme, setWallpaper, showToast, hideToast, askDeleteRoom } = uiSlice.actions;
+export const { setTheme, setWallpaper, showToast, hideToast, askDeleteRoom, setNewChatOpen } = uiSlice.actions;
 export default uiSlice.reducer;

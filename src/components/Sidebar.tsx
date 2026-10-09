@@ -3,7 +3,7 @@ import type { Room } from '../api/types';
 import { useMatch } from 'react-router';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { fetchMoreRooms, fetchRooms, markRoomRead } from '../store/roomsSlice';
-import { askDeleteRoom } from '../store/uiSlice';
+import { askDeleteRoom, setNewChatOpen } from '../store/uiSlice';
 import { displayName } from '../store/usersSlice';
 import { plainText } from '../utils/html';
 import { peerIdOf } from '../utils/people';
@@ -24,8 +24,10 @@ export default function Sidebar() {
   const users = useAppSelector((st) => st.users);
   const [query, setQuery] = useState('');
   const [menu, setMenu] = useState<{ room: Room; x: number; y: number } | null>(null);
-  const [newChat, setNewChat] = useState(false);
-  const closeNewChat = useCallback(() => setNewChat(false), []);
+  const newChat = useAppSelector((st) => st.ui.newChatOpen);
+  const setNewChat = useCallback((open: boolean) => dispatch(setNewChatOpen(open)), [dispatch]);
+  const closeNewChat = useCallback(() => setNewChat(false), [setNewChat]);
+  const noRooms = status === 'ready' && list.length === 0;
   const openMenu = useCallback((room: Room, x: number, y: number) => setMenu({ room, x, y }), []);
   const closeMenu = useCallback(() => setMenu(null), []);
 
@@ -65,6 +67,9 @@ export default function Sidebar() {
     <>
       <header className={s.header}>
         <MainMenu />
+        {noRooms ? (
+          <h1 className={s.heading}>Сообщения</h1>
+        ) : (
         <label className={s.search}>
           <IconSearch className={s.searchIcon} width={18} height={18} />
           <span className="visually-hidden">Поиск по диалогам</span>
@@ -81,6 +86,7 @@ export default function Sidebar() {
             </button>
           )}
         </label>
+        )}
       </header>
 
       <nav className={s.list} aria-label="Диалоги" ref={navRef}>
@@ -99,7 +105,7 @@ export default function Sidebar() {
           <div className={s.note}>
             <p className={s.noteTitle}>Здесь появятся ваши диалоги</p>
             <p>Найдите собеседника по имени или логину, чтобы начать переписку.</p>
-            <button className={s.retry} onClick={() => setNewChat(true)}>
+            <button className={s.cta} onClick={() => setNewChat(true)}>
               Найти собеседника
             </button>
           </div>

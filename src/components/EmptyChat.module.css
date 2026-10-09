@@ -16,3 +16,10 @@
   font-size: 0.875rem;
   text-align: center;
 }
+button.chip {
+  cursor: pointer;
+  transition: background 0.15s;
+}
+button.chip:hover {
+  background: var(--primary);
+}
