@@ -15,6 +15,7 @@ import {
   typing,
 } from '../store/roomsSlice';
 import { learnNames } from '../store/usersSlice';
+import { verifySession } from '../store/authSlice';
 import type { SocketStatus } from './useRoomSocket';
 
 /**
@@ -113,6 +114,8 @@ export function useChatStream() {
       onEvent,
       onStatus: (next, reconnected) => {
         setStatus(next);
+        // сервер закрыл поток как анониму — возможно, закончилась сессия
+        if (next === 'forbidden') dispatch(verifySession());
         // пока были офлайн, события могли потеряться — сверяем список
         if (next === 'open' && reconnected) dispatch(fetchRooms());
       },

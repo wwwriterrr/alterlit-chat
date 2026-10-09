@@ -1,5 +1,5 @@
 import type { AxiosProgressEvent } from 'axios';
-import { http, setCsrfFallback } from './http';
+import { http } from './http';
 
 const USERS_SELF = import.meta.env.VITE_SELF_URL || '/api/v1/users/session/self/';
 import type { Message, Paginated, RawRoom, Room, RoomMember, User, UserSearchResult } from './types';
@@ -30,21 +30,10 @@ function unwrap<T>(data: T[] | Paginated<T>): { items: T[]; next: string | null 
 }
 
 export const authApi = {
-  async csrf() {
-    const { data } = await http.get<{ csrfToken: string }>('/auth/csrf/');
-    if (data?.csrfToken) setCsrfFallback(data.csrfToken);
-  },
   /** Текущий пользователь сайта — живёт вне /api/v1/chat/. */
   async me() {
     const { data } = await http.get<User>(USERS_SELF, { baseURL: '' });
     return data;
-  },
-  async login(username: string, password: string) {
-    const { data } = await http.post<User>('/auth/login/', { username, password });
-    return data;
-  },
-  async logout() {
-    await http.post('/auth/logout/');
   },
 };
 

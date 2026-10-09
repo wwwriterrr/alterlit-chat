@@ -5,10 +5,10 @@ import { BrowserRouter } from 'react-router';
 import App from './App';
 import { setUnauthorizedHandler } from './api/http';
 import { store } from './store';
-import { sessionExpired } from './store/authSlice';
+import { verifySession } from './store/authSlice';
 import './styles/global.css';
 
-setUnauthorizedHandler(() => store.dispatch(sessionExpired()));
+setUnauthorizedHandler(() => store.dispatch(verifySession()));
 
 const rootEl = document.getElementById('root')!;
 // URL страницы чата задаёт шаблон Django (data-base), а не путь к статике

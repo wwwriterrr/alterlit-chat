@@ -2,19 +2,14 @@ import axios, { AxiosError } from 'axios';
 
 export const API_BASE = import.meta.env.VITE_API_BASE || '/api/v1/chat';
 
-let csrfFallback: string | null = null;
-
 export function readCookie(name: string): string | null {
   const match = document.cookie.match(new RegExp('(?:^|; )' + name + '=([^;]*)'));
   return match ? decodeURIComponent(match[1]) : null;
 }
 
 export function getCsrfToken(): string | null {
-  return readCookie('csrftoken') ?? csrfFallback;
-}
-
-export function setCsrfFallback(token: string) {
-  csrfFallback = token;
+  // куку ставит view шаблона чата (ensure_csrf_cookie)
+  return readCookie('csrftoken');
 }
 
 export const http = axios.create({
@@ -40,7 +35,10 @@ export function setUnauthorizedHandler(fn: Unauthorized) {
 http.interceptors.response.use(
   (r) => r,
   (error: AxiosError) => {
-    if (error.response?.status === 401) onUnauthorized();
+    // 401/403 — возможно, закончилась сессия; запрос самого self не перепроверяем
+    const status = error.response?.status;
+    const isSelf = (error.config?.url ?? '').includes('/users/session/self/');
+    if ((status === 401 || status === 403) && !isSelf) onUnauthorized();
     return Promise.reject(error);
   },
 );

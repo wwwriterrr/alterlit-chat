@@ -8,4 +8,6 @@ interface ImportMetaEnv {
   readonly VITE_SELF_URL?: string;
   readonly VITE_SEND_HTML?: string;
   readonly VITE_PROFILE_URL?: string;
+  readonly VITE_LOGIN_URL?: string;
+  readonly VITE_LOGOUT_URL?: string;
 }

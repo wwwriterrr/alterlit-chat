@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
-import { logout } from '../store/authSlice';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { setTheme, setWallpaper, type ThemePref } from '../store/uiSlice';
 import { WALLPAPERS } from '../utils/wallpaper';
+import { logoutUrl } from '../utils/people';
 import Avatar from './Avatar';
 import { IconLogout, IconMenu, IconMoon, IconSun } from './Icons';
 import s from './MainMenu.module.css';
@@ -85,10 +85,10 @@ export default function MainMenu() {
               ))}
             </div>
           </div>
-          <button role="menuitem" className={`${s.item} ${s.danger}`} onClick={() => dispatch(logout())}>
+          <a role="menuitem" className={`${s.item} ${s.danger}`} href={logoutUrl()}>
             <IconLogout width={20} height={20} />
-            Выйти
-          </button>
+            Выйти из аккаунта
+          </a>
         </div>
       )}
     </div>

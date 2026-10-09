@@ -21,3 +21,13 @@ export function profileUrl(username: string) {
   const template = import.meta.env.VITE_PROFILE_URL || 'https://alterlit.ru/profile/{username}/';
   return template.replace('{username}', encodeURIComponent(username));
 }
+
+/** Куда отправлять неавторизованного пользователя. VITE_LOGIN_URL, по умолчанию — главная сайта. */
+export function loginUrl() {
+  return import.meta.env.VITE_LOGIN_URL || 'https://alterlit.ru/';
+}
+
+/** Выход на сайте. */
+export function logoutUrl() {
+  return import.meta.env.VITE_LOGOUT_URL || 'https://alterlit.ru/logout/';
+}

@@ -67,6 +67,9 @@
   font-size: 0.875rem;
 }
 .submit {
+  display: grid;
+  place-items: center;
+  text-decoration: none;
   margin-top: 6px;
   height: 50px;
   border-radius: 12px;
