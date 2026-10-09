@@ -2,7 +2,7 @@ import type { AxiosProgressEvent } from 'axios';
 import { http, setCsrfFallback } from './http';
 
 const USERS_SELF = import.meta.env.VITE_SELF_URL || '/api/v1/users/session/self/';
-import type { Message, Paginated, RawRoom, Room, RoomMember, User } from './types';
+import type { Message, Paginated, RawRoom, Room, RoomMember, User, UserSearchResult } from './types';
 
 /** next из DRF — абсолютный URL; превращаем в путь, чтобы работал и через dev-прокси. */
 function toPath(url: string) {
@@ -49,20 +49,19 @@ export const authApi = {
 };
 
 export const chatApi = {
-  async rooms() {
-    const rooms: Room[] = [];
-    let url: string | null = null;
-    // идём по страницам, если включена пагинация (ROOMS_LIMIT = 200)
-    for (let i = 0; i < 20; i++) {
-      const res: { data: RawRoom[] | Paginated<RawRoom> } = url
-        ? await http.get(url, { baseURL: '' })
-        : await http.get('/rooms/');
-      const page = unwrap(res.data);
-      rooms.push(...page.items.map(normalizeRoom));
-      url = page.next;
-      if (!url) break;
-    }
-    return rooms;
+  /** Страница списка диалогов (LimitOffsetPagination; без пагинации — весь список). */
+  async rooms(offset: number, limit: number) {
+    const { data } = await http.get<RawRoom[] | Paginated<RawRoom>>('/rooms/', { params: { offset, limit } });
+    const page = unwrap(data);
+    return { items: page.items.map(normalizeRoom), more: page.next !== null };
+  },
+  /** Поиск собеседника: по псевдониму и логину, без себя и скрытых. */
+  async searchUsers(q: string, offset: number, signal?: AbortSignal) {
+    const { data } = await http.get<{ objects: UserSearchResult[]; more: boolean }>('/users/search/', {
+      params: { q, offset },
+      signal,
+    });
+    return data;
   },
   async dialogWith(peerId: number) {
     const { data } = await http.post<RawRoom>(`/rooms/dialog/${peerId}/`);

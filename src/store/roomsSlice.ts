@@ -1,7 +1,7 @@
 import { createAsyncThunk, createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import { chatApi } from '../api/chatApi';
 import { errorText } from '../api/http';
-import type { Message, Room } from '../api/types';
+import type { Message, Room, UserSearchResult } from '../api/types';
 import { dateMs } from '../utils/date';
 import { attachmentSummary } from '../utils/files';
 import type { AppDispatch, RootState } from './index';
@@ -18,7 +18,12 @@ interface RoomsState {
   peerReadUpTo: Record<number, number>;
   /** чаты, удаление которых ещё не подтвердил сервер — не возвращаем их из опроса /rooms/ */
   hiding: number[];
+  /** на сервере есть ещё чаты дальше загруженных */
+  hasMore: boolean;
+  loadingMore: boolean;
 }
+
+export const ROOMS_PAGE = 30;
 
 const initialState: RoomsState = {
   list: [],
@@ -27,18 +32,51 @@ const initialState: RoomsState = {
   typingUntil: {},
   peerReadUpTo: {},
   hiding: [],
+  hasMore: false,
+  loadingMore: false,
 };
 
-export const fetchRooms = createAsyncThunk('rooms/fetch', async (_: void, { dispatch, rejectWithValue }) => {
+/**
+ * Загрузка/обновление списка одним запросом: первая страница при старте,
+ * а при обновлении — столько, сколько уже загружено (offset=0, limit=N).
+ * Так обновляется ровно видимая часть списка, без обхода всех страниц.
+ */
+export const fetchRooms = createAsyncThunk<
+  { items: Room[]; more: boolean },
+  void,
+  { state: RootState; rejectValue: string }
+>('rooms/fetch', async (_, { dispatch, getState, rejectWithValue }) => {
   try {
-    const rooms = await chatApi.rooms();
-    const profiles = rooms.flatMap((r) => r.membersInfo ?? []);
+    const limit = Math.max(ROOMS_PAGE, getState().rooms.list.length);
+    const page = await chatApi.rooms(0, limit);
+    const profiles = page.items.flatMap((r) => r.membersInfo ?? []);
     if (profiles.length) dispatch(learnProfiles(profiles));
-    return rooms;
+    return page;
   } catch (e) {
     return rejectWithValue(errorText(e, 'Не удалось загрузить диалоги.'));
   }
 });
+
+/** Следующая страница при прокрутке списка. */
+export const fetchMoreRooms = createAsyncThunk<
+  { items: Room[]; more: boolean },
+  void,
+  { state: RootState }
+>(
+  'rooms/fetchMore',
+  async (_, { dispatch, getState }) => {
+    const page = await chatApi.rooms(getState().rooms.list.length, ROOMS_PAGE);
+    const profiles = page.items.flatMap((r) => r.membersInfo ?? []);
+    if (profiles.length) dispatch(learnProfiles(profiles));
+    return page;
+  },
+  {
+    condition: (_, { getState }) => {
+      const { hasMore, loadingMore, status } = getState().rooms;
+      return hasMore && !loadingMore && status === 'ready';
+    },
+  },
+);
 
 /**
  * Запасной путь для бэкенда без профилей в members: для диалогов с неизвестным
@@ -161,7 +199,8 @@ const roomsSlice = createSlice({
       if (s.status !== 'ready') s.status = 'loading';
     });
     b.addCase(fetchRooms.fulfilled, (s, a) => {
-      s.list = a.payload.filter((r) => !s.hiding.includes(r.id));
+      s.list = a.payload.items.filter((r) => !s.hiding.includes(r.id));
+      s.hasMore = a.payload.more;
       sortRooms(s.list);
       s.status = 'ready';
       s.error = null;
@@ -169,6 +208,20 @@ const roomsSlice = createSlice({
     b.addCase(fetchRooms.rejected, (s, a) => {
       if (s.status !== 'ready') s.status = 'error';
       s.error = (a.payload as string) ?? null;
+    });
+    b.addCase(fetchMoreRooms.pending, (s) => {
+      s.loadingMore = true;
+    });
+    b.addCase(fetchMoreRooms.fulfilled, (s, a) => {
+      // страницы могли сдвинуться (чат поднялся наверх) — повторы отбрасываем по id
+      const known = new Set(s.list.map((r) => r.id));
+      s.list.push(...a.payload.items.filter((r) => !known.has(r.id) && !s.hiding.includes(r.id)));
+      s.hasMore = a.payload.more;
+      s.loadingMore = false;
+      sortRooms(s.list);
+    });
+    b.addCase(fetchMoreRooms.rejected, (s) => {
+      s.loadingMore = false;
     });
     b.addCase(openDialog.fulfilled, (s, a) => upsertRoom(s, a.payload));
   },
@@ -210,5 +263,20 @@ export function markRoomRead(roomId: number) {
     } catch {
       dispatch(fetchRooms());
     }
+  };
+}
+
+/**
+ * Открыть чат с найденным пользователем: если диалог есть в списке — просто
+ * переход, иначе POST dialog/ (создаст новый или вернёт удалённый). -> id комнаты.
+ */
+export function startChatWith(user: UserSearchResult) {
+  return async (dispatch: AppDispatch, getState: () => RootState): Promise<number | null> => {
+    dispatch(learnProfiles([user]));
+    if (user.room_id && getState().rooms.list.some((r) => r.id === user.room_id)) return user.room_id;
+    const res = await dispatch(openDialog(user.id));
+    if (openDialog.fulfilled.match(res)) return res.payload.id;
+    dispatch(showToast((res.payload as string) ?? 'Не удалось открыть диалог.'));
+    return null;
   };
 }

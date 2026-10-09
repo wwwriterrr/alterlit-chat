@@ -1,13 +1,14 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { Room } from '../api/types';
 import { useMatch } from 'react-router';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { fetchRooms, markRoomRead } from '../store/roomsSlice';
+import { fetchMoreRooms, fetchRooms, markRoomRead } from '../store/roomsSlice';
 import { askDeleteRoom } from '../store/uiSlice';
 import { displayName } from '../store/usersSlice';
 import { plainText } from '../utils/html';
 import { peerIdOf } from '../utils/people';
-import { IconCheck, IconClose, IconSearch, IconTrash } from './Icons';
+import { IconCheck, IconClose, IconEdit, IconSearch, IconTrash } from './Icons';
+import NewChatPanel from './NewChatPanel';
 import { MessageMenu, type MenuItem } from './MessageMenu';
 import MainMenu from './MainMenu';
 import RoomItem from './RoomItem';
@@ -17,10 +18,14 @@ export default function Sidebar() {
   const dispatch = useAppDispatch();
   const roomId = useMatch('/room/:roomId')?.params.roomId;
   const meId = useAppSelector((st) => st.auth.user?.id);
-  const { list, status, error } = useAppSelector((st) => st.rooms);
+  const { list, status, error, hasMore, loadingMore } = useAppSelector((st) => st.rooms);
+  const navRef = useRef<HTMLElement>(null);
+  const sentinelRef = useRef<HTMLDivElement>(null);
   const users = useAppSelector((st) => st.users);
   const [query, setQuery] = useState('');
   const [menu, setMenu] = useState<{ room: Room; x: number; y: number } | null>(null);
+  const [newChat, setNewChat] = useState(false);
+  const closeNewChat = useCallback(() => setNewChat(false), []);
   const openMenu = useCallback((room: Room, x: number, y: number) => setMenu({ room, x, y }), []);
   const closeMenu = useCallback(() => setMenu(null), []);
 
@@ -41,6 +46,20 @@ export default function Sidebar() {
       return name.includes(q) || plainText(r.last_message_content).toLowerCase().includes(q);
     });
   }, [list, query, users, meId]);
+
+  // следующая страница, когда конец списка показался на экране
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el || !hasMore || newChat) return;
+    const io = new IntersectionObserver((e) => e[0].isIntersecting && dispatch(fetchMoreRooms()), {
+      root: navRef.current,
+      rootMargin: '300px',
+    });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [hasMore, newChat, dispatch, list.length]);
+
+  if (newChat) return <NewChatPanel onClose={closeNewChat} />;
 
   return (
     <>
@@ -64,7 +83,7 @@ export default function Sidebar() {
         </label>
       </header>
 
-      <nav className={s.list} aria-label="Диалоги">
+      <nav className={s.list} aria-label="Диалоги" ref={navRef}>
         {status === 'loading' && <RoomSkeleton />}
 
         {status === 'error' && (
@@ -79,7 +98,10 @@ export default function Sidebar() {
         {status === 'ready' && list.length === 0 && (
           <div className={s.note}>
             <p className={s.noteTitle}>Здесь появятся ваши диалоги</p>
-            <p>Чтобы начать переписку, откройте профиль автора на alterlit.ru и нажмите «Написать».</p>
+            <p>Найдите собеседника по имени или логину, чтобы начать переписку.</p>
+            <button className={s.retry} onClick={() => setNewChat(true)}>
+              Найти собеседника
+            </button>
           </div>
         )}
 
@@ -96,7 +118,17 @@ export default function Sidebar() {
             </li>
           ))}
         </ul>
+        {hasMore && !query && <div ref={sentinelRef} className={s.sentinel} aria-hidden />}
+        {loadingMore && <div className={s.moreLoader} role="status" aria-label="Загружаем ещё диалоги" />}
+        {hasMore && query && (
+          <p className={s.hint}>
+            Поиск идёт по загруженным диалогам. Чтобы найти любого собеседника, нажмите карандаш внизу.
+          </p>
+        )}
       </nav>
+      <button className={s.fab} onClick={() => setNewChat(true)} aria-label="Новый чат" title="Новый чат">
+        <IconEdit />
+      </button>
       {menu && <MessageMenu x={menu.x} y={menu.y} items={menuItems(menu.room)} onClose={closeMenu} />}
     </>
   );

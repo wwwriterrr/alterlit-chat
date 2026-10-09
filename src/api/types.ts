@@ -37,6 +37,11 @@ export interface RoomMember {
   avatar?: string | null;
 }
 
+/** Результат GET /chat/users/search/ — участник + id уже существующего диалога. */
+export interface UserSearchResult extends RoomMember {
+  room_id: number | null;
+}
+
 /** Комната как её отдаёт бэкенд: members — id (контракт 1.0) или объекты. */
 export interface RawRoom extends Omit<Room, 'members' | 'membersInfo'> {
   members: Array<number | RoomMember>;

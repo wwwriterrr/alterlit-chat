@@ -6,6 +6,7 @@
   overflow: hidden;
 }
 .sidebar {
+  position: relative;
   min-width: 0;
   border-right: 1px solid var(--line);
   background: var(--bg-app);
