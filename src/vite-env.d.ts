@@ -7,4 +7,5 @@ interface ImportMetaEnv {
   readonly VITE_SERVER_UTC_OFFSET?: string;
   readonly VITE_SELF_URL?: string;
   readonly VITE_SEND_HTML?: string;
+  readonly VITE_PROFILE_URL?: string;
 }

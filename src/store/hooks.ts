@@ -9,5 +9,9 @@ export const useAppSelector = useSelector.withTypes<RootState>();
 export function usePeer(peerId: number | undefined) {
   const name = useAppSelector((s) => (peerId === undefined ? undefined : displayName(s.users, peerId)));
   const avatar = useAppSelector((s) => (peerId === undefined ? null : (s.users.profiles[peerId]?.avatar ?? null)));
-  return { name: name ?? 'Собеседник', known: name !== undefined, avatar };
+  // логин: из профиля участника, а если его нет — из sender_username сообщений
+  const username = useAppSelector((s) =>
+    peerId === undefined ? undefined : (s.users.profiles[peerId]?.username ?? s.users.usernames[peerId]),
+  );
+  return { name: name ?? 'Собеседник', known: name !== undefined, avatar, username };
 }

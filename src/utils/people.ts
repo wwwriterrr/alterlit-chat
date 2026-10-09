@@ -15,3 +15,9 @@ export function initials(name: string) {
 export function peerIdOf(members: number[], meId: number | undefined) {
   return members.find((m) => m !== meId) ?? members[0];
 }
+
+/** Профиль пользователя на сайте. Шаблон — VITE_PROFILE_URL, {username} заменяется на логин. */
+export function profileUrl(username: string) {
+  const template = import.meta.env.VITE_PROFILE_URL || 'https://alterlit.ru/profile/{username}/';
+  return template.replace('{username}', encodeURIComponent(username));
+}

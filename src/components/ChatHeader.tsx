@@ -3,9 +3,9 @@ import { Link } from 'react-router';
 import type { SocketStatus } from '../hooks/useRoomSocket';
 import { useAppDispatch, useAppSelector, usePeer } from '../store/hooks';
 import { askDeleteRoom } from '../store/uiSlice';
-import { peerIdOf } from '../utils/people';
+import { peerIdOf, profileUrl } from '../utils/people';
 import Avatar from './Avatar';
-import { IconBack, IconMore, IconTrash } from './Icons';
+import { IconBack, IconMore, IconTrash, IconUser } from './Icons';
 import { MessageMenu } from './MessageMenu';
 import s from './ChatHeader.module.css';
 
@@ -17,7 +17,7 @@ export default function ChatHeader({ roomId, socketStatus }: { roomId: number; s
     st.messages.byRoom[roomId]?.items.find((m) => m.sender_id !== meId)?.sender_id,
   );
   const peerId = room ? peerIdOf(room.members, meId) : fallbackPeer;
-  const { name, known, avatar } = usePeer(peerId);
+  const { name, known, avatar, username } = usePeer(peerId);
   const isTyping = useAppSelector((st) => Boolean(st.rooms.typingUntil[roomId]));
   const dispatch = useAppDispatch();
   const [menuAt, setMenuAt] = useState<{ x: number; y: number } | null>(null);
@@ -48,7 +48,7 @@ export default function ChatHeader({ roomId, socketStatus }: { roomId: number; s
           aria-expanded={!!menuAt}
           onClick={(e) => {
             const r = e.currentTarget.getBoundingClientRect();
-            setMenuAt({ x: r.right - 220, y: r.bottom + 6 });
+            setMenuAt({ x: r.right - 300, y: r.bottom + 6 });
           }}
         >
           <IconMore />
@@ -60,6 +60,17 @@ export default function ChatHeader({ roomId, socketStatus }: { roomId: number; s
           y={menuAt.y}
           onClose={() => setMenuAt(null)}
           items={[
+            ...(username
+              ? [
+                  {
+                    key: 'profile',
+                    // имя в кавычках — так фраза верна без склонения («в профиль «Аля К.»»)
+                    label: known ? `Перейти в профиль «${name}»` : 'Перейти в профиль собеседника',
+                    icon: <IconUser />,
+                    onSelect: () => window.open(profileUrl(username), '_blank', 'noopener'),
+                  },
+                ]
+              : []),
             {
               key: 'delete',
               label: 'Удалить чат',
