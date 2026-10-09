@@ -1,14 +1,18 @@
-import { useEffect, useLayoutEffect, useRef, useState, type ClipboardEvent, type KeyboardEvent } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Message } from '../api/types';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { editMessage, sendMessage } from '../store/messagesSlice';
 import { ACCEPT, attachmentSummary, formatSize, fileExt, type Attachment } from '../utils/files';
-import { composeContent, htmlToText } from '../utils/html';
+import { htmlToText } from '../utils/html';
+import { normalizeContent, toEditorHtml } from '../utils/richtext';
+import RichInput, { type RichInputHandle } from './RichInput';
 import { IconCheck, IconClip, IconClose, IconEdit, IconFile, IconMusic, IconSend } from './Icons';
 import s from './Composer.module.css';
 
-// черновики переживают переключение между диалогами
+// черновики (разметка редактора) переживают переключение между диалогами
 const drafts = new Map<number, string>();
+// VITE_SEND_HTML=false — отправлять простой текст, как в контракте
+const SEND_HTML = import.meta.env.VITE_SEND_HTML !== 'false';
 
 const TYPING_EVERY_MS = 3000;
 const TYPING_IDLE_MS = 4000;
@@ -42,7 +46,7 @@ export default function Composer({
   onEditEnd,
 }: Props) {
   const dispatch = useAppDispatch();
-  const [text, setText] = useState(() => drafts.get(roomId) ?? '');
+  const [empty, setEmpty] = useState(() => !drafts.get(roomId));
   const meId = useAppSelector((st) => st.auth.user?.id);
   // для ↑ в пустом поле — редактировать последнее своё сообщение, как в Telegram
   const lastOwn = useAppSelector((st) => {
@@ -51,121 +55,90 @@ export default function Composer({
     return undefined;
   });
   const stashedDraft = useRef<string | null>(null);
-  const area = useRef<HTMLTextAreaElement>(null);
+  const input = useRef<RichInputHandle>(null);
   const fileInput = useRef<HTMLInputElement>(null);
   const typingSentAt = useRef(0);
   const idleTimer = useRef<number | undefined>(undefined);
   const coarse = typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches;
 
+  // черновик этого диалога
   useEffect(() => {
-    if (!editing) drafts.set(roomId, text);
-  }, [roomId, text, editing]);
+    input.current?.setHtml(drafts.get(roomId) ?? '');
+    if (!coarse) input.current?.focus();
+    return () => window.clearTimeout(idleTimer.current);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  // вход в редактирование: черновик откладываем, в поле — текст сообщения;
+  // вход в редактирование: черновик откладываем, в поле — сообщение с форматированием;
   // выход: черновик возвращается
   const editingId = editing?.id;
   useEffect(() => {
+    const ed = input.current;
+    if (!ed) return;
     if (editingId === undefined) {
       if (stashedDraft.current !== null) {
-        setText(stashedDraft.current);
+        ed.setHtml(stashedDraft.current);
         stashedDraft.current = null;
       }
       return;
     }
     if (stashedDraft.current === null) stashedDraft.current = drafts.get(roomId) ?? '';
-    const value = htmlToText(editing?.content ?? null);
-    setText(value);
-    requestAnimationFrame(() => {
-      const el = area.current;
-      if (!el) return;
-      el.focus();
-      el.setSelectionRange(value.length, value.length);
-    });
+    ed.focus();
+    ed.setHtml(toEditorHtml(editing?.content ?? null));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editingId]);
 
-  useEffect(() => {
-    if (!coarse) area.current?.focus();
-    return () => window.clearTimeout(idleTimer.current);
-  }, [coarse]);
-
-  // авто-высота поля
-  useLayoutEffect(() => {
-    const el = area.current;
-    if (!el) return;
-    el.style.height = 'auto';
-    el.style.height = `${Math.min(el.scrollHeight, 200)}px`;
-  }, [text]);
-
-  const stopTyping = () => {
+  const stopTyping = useCallback(() => {
     window.clearTimeout(idleTimer.current);
     if (typingSentAt.current) {
       typingSentAt.current = 0;
       sendTyping(false);
     }
-  };
+  }, [sendTyping]);
 
-  const onChange = (value: string) => {
-    setText(value);
-    if (editing) return;
-    if (!value.trim()) return stopTyping();
-    const now = Date.now();
-    if (now - typingSentAt.current > TYPING_EVERY_MS) {
-      typingSentAt.current = now;
-      sendTyping(true);
-    }
-    window.clearTimeout(idleTimer.current);
-    idleTimer.current = window.setTimeout(stopTyping, TYPING_IDLE_MS);
-  };
+  const onChange = useCallback(
+    (isEmpty: boolean) => {
+      setEmpty(isEmpty);
+      if (editing) return;
+      drafts.set(roomId, isEmpty ? '' : (input.current?.getHtml() ?? ''));
+      if (isEmpty) return stopTyping();
+      const now = Date.now();
+      if (now - typingSentAt.current > TYPING_EVERY_MS) {
+        typingSentAt.current = now;
+        sendTyping(true);
+      }
+      window.clearTimeout(idleTimer.current);
+      idleTimer.current = window.setTimeout(stopTyping, TYPING_IDLE_MS);
+    },
+    [editing, roomId, sendTyping, stopTyping],
+  );
 
-  const canSend = editing
-    ? text.trim().length > 0 || editing.files.length > 0
-    : text.trim().length > 0 || attachments.length > 0;
+  const canSend = editing ? !empty || editing.files.length > 0 : !empty || attachments.length > 0;
+
+  const content = () => {
+    const ed = input.current;
+    if (!ed) return '';
+    return SEND_HTML ? ed.serialize() : ed.plainText();
+  };
 
   const saveEdit = (message: Message) => {
-    const trimmed = text.trim();
-    if (trimmed !== htmlToText(message.content)) {
-      dispatch(editMessage(message, trimmed ? composeContent(trimmed) : ''));
-    }
+    const next = content();
+    const changed = SEND_HTML
+      ? normalizeContent(next) !== normalizeContent(message.content)
+      : next !== htmlToText(message.content);
+    if (changed) dispatch(editMessage(message, next));
     onEditEnd();
   };
 
   const send = () => {
     if (!canSend) return;
     if (editing) return saveEdit(editing);
-    const trimmed = text.trim();
-    dispatch(sendMessage(roomId, trimmed ? composeContent(trimmed) : '', attachments));
-    setText('');
+    dispatch(sendMessage(roomId, content(), attachments));
+    input.current?.clear();
     drafts.delete(roomId);
     stopTyping();
     onSent();
-    area.current?.focus();
-  };
-
-  const onKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Escape' && editing) {
-      e.preventDefault();
-      onEditEnd();
-      return;
-    }
-    if (e.key === 'ArrowUp' && !editing && !text && !attachments.length && lastOwn) {
-      e.preventDefault();
-      onEditStart(lastOwn);
-      return;
-    }
-    // на телефонах Enter — перенос строки, отправка — кнопкой
-    if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing && !coarse) {
-      e.preventDefault();
-      send();
-    }
-  };
-
-  const onPaste = (e: ClipboardEvent<HTMLTextAreaElement>) => {
-    const files = Array.from(e.clipboardData.files);
-    if (files.length && !editing) {
-      e.preventDefault();
-      onAddFiles(files);
-    }
+    input.current?.focus();
   };
 
   return (
@@ -251,19 +224,24 @@ export default function Composer({
                 e.target.value = '';
               }}
             />
-            <label className="visually-hidden" htmlFor={`composer-${roomId}`}>
-              Сообщение
-            </label>
-            <textarea
+            <RichInput
               id={`composer-${roomId}`}
-              ref={area}
-              className={s.input}
-              rows={1}
+              ref={input}
+              coarse={coarse}
               placeholder={editing ? 'Текст сообщения' : attachments.length ? 'Добавьте подпись' : 'Сообщение'}
-              value={text}
-              onChange={(e) => onChange(e.target.value)}
-              onKeyDown={onKeyDown}
-              onPaste={onPaste}
+              onChange={onChange}
+              onSubmit={send}
+              onEscape={() => {
+                if (!editing) return false;
+                onEditEnd();
+                return true;
+              }}
+              onArrowUpEmpty={() => {
+                if (editing || attachments.length || !lastOwn) return false;
+                onEditStart(lastOwn);
+                return true;
+              }}
+              onPasteFiles={(files) => !editing && onAddFiles(files)}
               onBlur={() => !editing && stopTyping()}
             />
           </div>

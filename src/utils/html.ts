@@ -1,7 +1,7 @@
 // Сообщения с сайта приходят HTML-ом из редактора (<p>, <br>, &nbsp;),
 // а из этого клиента — простым текстом. Рендерим оба варианта безопасно.
 
-const ALLOWED = new Set(['P', 'BR', 'B', 'STRONG', 'I', 'EM', 'U', 'S', 'STRIKE', 'A', 'UL', 'OL', 'LI', 'BLOCKQUOTE', 'CODE', 'PRE', 'SPAN', 'DIV']);
+const ALLOWED = new Set(['P', 'BR', 'B', 'STRONG', 'I', 'EM', 'U', 'INS', 'S', 'STRIKE', 'DEL', 'A', 'UL', 'OL', 'LI', 'BLOCKQUOTE', 'CODE', 'PRE', 'SPAN', 'DIV']);
 const URL_RE = /\bhttps?:\/\/[^\s<>"']+[^\s<>"'.,;:!?)\]]/gi;
 
 export function looksLikeHtml(s: string) {
