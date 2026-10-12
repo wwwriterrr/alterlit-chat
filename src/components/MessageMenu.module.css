@@ -28,14 +28,21 @@
   text-align: left;
   color: var(--text);
 }
-.item > :not(svg) {
-  min-width: 0;
-}
-.item svg {
+.icon {
   flex: none;
+  display: grid;
+  place-items: center;
+  /* 20px — как у иконок; аватар 24px выступает за рамку, но текст пунктов остаётся на одной линии */
   width: 20px;
   height: 20px;
   color: var(--text-2);
+}
+.icon > svg {
+  width: 20px;
+  height: 20px;
+}
+.label {
+  min-width: 0;
 }
 .item:hover,
 .item:focus-visible {
@@ -43,7 +50,7 @@
   outline: none;
 }
 .item[data-danger],
-.item[data-danger] svg {
+.item[data-danger] .icon {
   color: var(--danger);
 }
 

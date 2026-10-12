@@ -65,9 +65,15 @@ export default function ChatHeader({ roomId, socketStatus }: { roomId: number; s
               ? [
                   {
                     key: 'profile',
-                    // имя в кавычках — так фраза верна без склонения («в профиль «Аля К.»»)
-                    label: known ? `Перейти в профиль «${name}»` : 'Перейти в профиль собеседника',
-                    icon: <IconUser />,
+                    // имя жирным, без склонения: «Перейти в профиль Аля К.»
+                    label: known ? (
+                      <>
+                        Перейти в профиль <b>{name}</b>
+                      </>
+                    ) : (
+                      'Перейти в профиль собеседника'
+                    ),
+                    icon: peerId !== undefined ? <Avatar id={peerId} name={known ? name : ''} src={avatar} size={24} /> : <IconUser />,
                     onSelect: () => window.open(profileUrl(username), '_blank', 'noopener'),
                   },
                 ]

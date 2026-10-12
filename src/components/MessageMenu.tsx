@@ -3,7 +3,7 @@ import s from './MessageMenu.module.css';
 
 export interface MenuItem {
   key: string;
-  label: string;
+  label: ReactNode;
   icon: ReactNode;
   danger?: boolean;
   onSelect: () => void;
@@ -66,8 +66,8 @@ export function MessageMenu({ x, y, items, onClose }: { x: number; y: number; it
             item.onSelect();
           }}
         >
-          {item.icon}
-          {item.label}
+          <span className={s.icon}>{item.icon}</span>
+          <span className={s.label}>{item.label}</span>
         </button>
       ))}
     </div>
