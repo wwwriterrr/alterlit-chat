@@ -15,7 +15,7 @@
   pointer-events: auto;
   padding: 10px 16px;
   border-radius: 12px;
-  background: var(--pine);
+  background: var(--chrome);
   color: #fff;
   font-family: var(--sans);
   font-size: 0.875rem;
@@ -32,7 +32,7 @@
   margin: -4px -6px -4px 0;
   padding: 4px 8px;
   border-radius: 8px;
-  color: var(--amber);
+  color: var(--chrome-accent);
   font-weight: 600;
 }
 .action:hover {

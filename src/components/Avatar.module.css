@@ -4,7 +4,7 @@
   place-items: center;
   border-radius: 50%;
   color: #fff;
-  font-family: var(--serif);
+  font-family: var(--font-main);
   font-weight: 700;
   letter-spacing: 0.02em;
   user-select: none;

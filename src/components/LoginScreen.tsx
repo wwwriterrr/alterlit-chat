@@ -11,8 +11,8 @@ export default function LoginScreen() {
       <div className={s.card}>
         <div className={s.logo} aria-hidden>
           <svg viewBox="0 0 32 32" width="56" height="56">
-            <rect width="32" height="32" rx="16" fill="var(--forest)" />
-            <path d="M9 11c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2v7c0 1.1-.9 2-2 2h-6.5L10.5 23v-3H11a2 2 0 0 1-2-2z" fill="var(--amber)" />
+            <rect width="32" height="32" rx="16" fill="#254f23" />
+            <path d="M9 11c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2v7c0 1.1-.9 2-2 2h-6.5L10.5 23v-3H11a2 2 0 0 1-2-2z" fill="#e9aa44" />
           </svg>
         </div>
         <h1 className={s.title}>{expired ? 'Сессия закончилась' : 'Необходима авторизация'}</h1>

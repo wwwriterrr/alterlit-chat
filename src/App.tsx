@@ -8,6 +8,8 @@ import LoginScreen from './components/LoginScreen';
 import Splash from './components/Splash';
 import { bootstrap } from './store/authSlice';
 import { useAppDispatch, useAppSelector } from './store/hooks';
+import { useMediaQuery } from './hooks/useMediaQuery';
+import { applyAppearance } from './utils/appearance';
 import { installWallpaperAssets } from './utils/wallpaper';
 
 export default function App() {
@@ -15,6 +17,9 @@ export default function App() {
   const status = useAppSelector((s) => s.auth.status);
   const theme = useAppSelector((s) => s.ui.theme);
   const wallpaper = useAppSelector((s) => s.ui.wallpaper);
+  const appearance = useAppSelector((s) => s.ui.appearance);
+  const systemDark = useMediaQuery('(prefers-color-scheme: dark)');
+  const dark = theme === 'dark' || (theme === 'system' && systemDark);
 
   useEffect(() => {
     dispatch(bootstrap());
@@ -25,11 +30,7 @@ export default function App() {
     document.documentElement.dataset.wp = wallpaper;
   }, [wallpaper]);
 
-  useEffect(() => {
-    const root = document.documentElement;
-    if (theme === 'system') delete root.dataset.theme;
-    else root.dataset.theme = theme;
-  }, [theme]);
+  useEffect(() => applyAppearance(appearance, dark), [appearance, dark]);
 
   if (status === 'checking') return <Splash />;
   if (status === 'error') return <Splash error onRetry={() => dispatch(bootstrap())} />;

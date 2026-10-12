@@ -3,11 +3,12 @@ import type { Room } from '../api/types';
 import { useMatch } from 'react-router';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { fetchMoreRooms, fetchRooms, markRoomRead } from '../store/roomsSlice';
-import { askDeleteRoom, setNewChatOpen } from '../store/uiSlice';
+import { askDeleteRoom, setAppearanceOpen, setNewChatOpen } from '../store/uiSlice';
 import { displayName } from '../store/usersSlice';
 import { plainText } from '../utils/html';
 import { peerIdOf } from '../utils/people';
 import { IconCheck, IconClose, IconEdit, IconSearch, IconTrash } from './Icons';
+import AppearancePanel from './AppearancePanel';
 import NewChatPanel from './NewChatPanel';
 import { MessageMenu, type MenuItem } from './MessageMenu';
 import MainMenu from './MainMenu';
@@ -27,6 +28,8 @@ export default function Sidebar() {
   const newChat = useAppSelector((st) => st.ui.newChatOpen);
   const setNewChat = useCallback((open: boolean) => dispatch(setNewChatOpen(open)), [dispatch]);
   const closeNewChat = useCallback(() => setNewChat(false), [setNewChat]);
+  const appearanceOpen = useAppSelector((st) => st.ui.appearanceOpen);
+  const closeAppearance = useCallback(() => dispatch(setAppearanceOpen(false)), [dispatch]);
   const noRooms = status === 'ready' && list.length === 0;
   const openMenu = useCallback((room: Room, x: number, y: number) => setMenu({ room, x, y }), []);
   const closeMenu = useCallback(() => setMenu(null), []);
@@ -52,16 +55,17 @@ export default function Sidebar() {
   // следующая страница, когда конец списка показался на экране
   useEffect(() => {
     const el = sentinelRef.current;
-    if (!el || !hasMore || newChat) return;
+    if (!el || !hasMore || newChat || appearanceOpen) return;
     const io = new IntersectionObserver((e) => e[0].isIntersecting && dispatch(fetchMoreRooms()), {
       root: navRef.current,
       rootMargin: '300px',
     });
     io.observe(el);
     return () => io.disconnect();
-  }, [hasMore, newChat, dispatch, list.length]);
+  }, [hasMore, newChat, appearanceOpen, dispatch, list.length]);
 
   if (newChat) return <NewChatPanel onClose={closeNewChat} />;
+  if (appearanceOpen) return <AppearancePanel onClose={closeAppearance} />;
 
   return (
     <>

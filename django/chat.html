@@ -21,13 +21,33 @@
     />
     <link rel="stylesheet" href="/assets/chat_legacy/chat.css" />
     <script>
-      try {
-        // тема и обои — до загрузки скрипта, чтобы не мигали
-        var t = localStorage.getItem('alterlit-chat-theme');
-        if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t;
-        var w = localStorage.getItem('alterlit-chat-wallpaper');
-        if (w) document.documentElement.dataset.wp = w;
-      } catch (e) {}
+      // Оформление и обои — до загрузки скрипта, чтобы не мигали.
+      // Повторяет src/utils/appearance.ts: при изменении ключей или шрифтов править и там.
+      (function () {
+        var d = document.documentElement, t = null, a = null, w = null;
+        try {
+          t = localStorage.getItem('alterlit-chat-theme');
+          a = JSON.parse(localStorage.getItem('alterlit-chat-appearance'));
+          w = localStorage.getItem('alterlit-chat-wallpaper');
+        } catch (e) {}
+        a = a || {};
+        var dark = t === 'dark' || (t !== 'light' && !!window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches);
+        d.dataset.palette = (dark ? a.dark : a.light) || (dark ? 'pine' : 'sage');
+        if (a.size === 's' || a.size === 'l') d.dataset.size = a.size;
+        var fonts = {
+          ptsans: 'https://fonts.googleapis.com/css2?family=PT+Sans:ital,wght@0,400;0,700;1,400&display=swap',
+          literata: 'https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,700;1,7..72,400&display=swap'
+        };
+        if (a.font === 'ptsans' || a.font === 'literata') {
+          d.dataset.font = a.font;
+          var l = document.createElement('link');
+          l.id = 'font-' + a.font;
+          l.rel = 'stylesheet';
+          l.href = fonts[a.font];
+          document.head.appendChild(l);
+        }
+        if (w) d.dataset.wp = w;
+      })();
     </script>
   </head>
   <body>

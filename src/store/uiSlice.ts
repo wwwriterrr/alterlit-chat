@@ -1,5 +1,6 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
+import { loadAppearance, saveAppearance, type Appearance } from '../utils/appearance';
 import { WALLPAPERS, type WallpaperId } from '../utils/wallpaper';
 
 export type ThemePref = 'system' | 'light' | 'dark';
@@ -36,12 +37,15 @@ const uiSlice = createSlice({
   name: 'ui',
   initialState: {
     theme: load(),
+    appearance: loadAppearance(),
     wallpaper: loadWallpaper(),
     toast: null as Toast | null,
     /** id чата, для которого открыт диалог «Удалить чат?» */
     confirmDeleteRoom: null as number | null,
     /** панель «Новый чат» вместо списка диалогов */
     newChatOpen: false,
+    /** панель «Оформление» вместо списка диалогов */
+    appearanceOpen: false,
   },
   reducers: {
     showToast: {
@@ -54,6 +58,15 @@ const uiSlice = createSlice({
     },
     setNewChatOpen(state, action: PayloadAction<boolean>) {
       state.newChatOpen = action.payload;
+      if (action.payload) state.appearanceOpen = false;
+    },
+    setAppearanceOpen(state, action: PayloadAction<boolean>) {
+      state.appearanceOpen = action.payload;
+      if (action.payload) state.newChatOpen = false;
+    },
+    setAppearance(state, action: PayloadAction<Partial<Appearance>>) {
+      state.appearance = { ...state.appearance, ...action.payload };
+      saveAppearance(state.appearance);
     },
     askDeleteRoom(state, action: PayloadAction<number | null>) {
       state.confirmDeleteRoom = action.payload;
@@ -81,5 +94,14 @@ const uiSlice = createSlice({
   },
 });
 
-export const { setTheme, setWallpaper, showToast, hideToast, askDeleteRoom, setNewChatOpen } = uiSlice.actions;
+export const {
+  setTheme,
+  setAppearance,
+  setAppearanceOpen,
+  setWallpaper,
+  showToast,
+  hideToast,
+  askDeleteRoom,
+  setNewChatOpen,
+} = uiSlice.actions;
 export default uiSlice.reducer;

@@ -77,7 +77,7 @@
   margin: 0 0 8px;
 }
 .noteTitle {
-  font-family: var(--serif);
+  font-family: var(--font-main);
   font-size: 1.0625rem;
   color: var(--text);
 }

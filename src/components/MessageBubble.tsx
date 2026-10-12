@@ -209,7 +209,10 @@ function DocCard({ file, pending }: { file: ViewFile; pending: PendingMessage | 
   const ext = fileExt(file.name !== 'файл' ? file.name : file.url);
   const sub = file.size !== undefined ? `${formatSize(file.size)} · ${ext}` : ext;
   const icon = (
-    <span className={s.docIcon} style={{ background: EXT_TONE[ext] ?? 'var(--primary)' }}>
+    <span
+      className={s.docIcon}
+      style={EXT_TONE[ext] ? { background: EXT_TONE[ext] } : { background: 'var(--primary)', color: 'var(--on-primary)' }}
+    >
       {pending ? <IconFile width={22} height={22} /> : <IconDownload width={22} height={22} />}
     </span>
   );

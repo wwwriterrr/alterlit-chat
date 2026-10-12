@@ -1,12 +1,30 @@
-/* Цвета взяты с alterlit.ru: хвоя #254F23 / #20301A, янтарь #E9AA44, серый #D7D7D7 */
+/* Цвета взяты с alterlit.ru: хвоя #254F23 / #20301A, янтарь #E9AA44, серый #D7D7D7.
+   Палитра выбирается атрибутом data-palette на <html> (см. utils/appearance.ts):
+   светлые — sage (по умолчанию, на :root) и paper; тёмные — pine, ink, library. */
 :root {
-  --serif: 'PT Serif', Georgia, 'Times New Roman', serif;
+  /* основной шрифт меняется в настройках (data-font), Open Sans — для служебного текста */
+  --font-main: 'PT Serif', Georgia, 'Times New Roman', serif;
   --sans: 'Open Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
 
-  --forest: #254f23;
-  --pine: #20301a;
-  --amber: #e9aa44;
+  --sidebar-w: 360px;
+  --header-h: 56px;
+}
+:root[data-font='ptsans'] {
+  --font-main: 'PT Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+:root[data-font='literata'] {
+  --font-main: 'Literata', Georgia, 'Times New Roman', serif;
+}
+/* размер текста: всё в интерфейсе задано в rem и масштабируется вместе с корнем */
+:root[data-size='s'] {
+  font-size: 93.75%;
+}
+:root[data-size='l'] {
+  font-size: 112.5%;
+}
 
+/* ── Шалфей — светлая, фирменная хвоя на шалфейном фоне ───────────────────── */
+:root {
   --bg-app: #ffffff;
   --bg-chat: #e3e7d4;
   --pattern: rgba(37, 79, 35, 0.11);
@@ -16,7 +34,7 @@
   --line: #e2e3dc;
   --text: #1c2818;
   --text-2: #636b5e;
-  --text-3: #959b8f;
+  --text-3: #868d80;
   --primary: #254f23;
   --primary-hover: #1b3d19;
   --on-primary: #ffffff;
@@ -30,14 +48,17 @@
   --selected-mark: transparent;
   --bubble-in: #ffffff;
   --bubble-out: #dcebc9;
-  --meta-in: #959b8f;
-  --meta-out: #4f7a43;
+  --meta-in: #7d8478;
+  --meta-out: #4a7340;
   --link: #2c6b29;
   --danger: #c0443f;
   --focus: #e9aa44;
+  /* тёмные всплывашки (тост, панель форматирования) и акцент на них */
+  --chrome: #20301a;
+  --chrome-accent: #e9aa44;
   --shadow-bubble: 0 1px 1px rgba(32, 48, 26, 0.13);
   --shadow-pop: 0 10px 30px rgba(32, 48, 26, 0.18), 0 2px 6px rgba(32, 48, 26, 0.1);
-  --date-chip: rgba(37, 79, 35, 0.55);
+  --date-chip: rgba(37, 79, 35, 0.6);
   /* обои: базовые цвета, из которых собраны все варианты */
   --wp-base: #dbe3cb;
   --wp-sage: #c4d8ba;
@@ -49,69 +70,73 @@
   --wp-rule: rgba(37, 79, 35, 0.085);
   --wp-margin: rgba(214, 140, 30, 0.5);
   --wp-grain: 0.35;
-
-  --sidebar-w: 360px;
-  --header-h: 56px;
   color-scheme: light;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) {
-    --bg-app: #172013;
-    --bg-chat: #0f150c;
-    --pattern: rgba(233, 170, 68, 0.06);
-    --surface: #1c2618;
-    --surface-2: #243020;
-    --surface-3: #2c3a27;
-    --line: #2a3625;
-    --text: #e7ebe1;
-    --text-2: #9ca694;
-    --text-3: #6f7a68;
-    --primary: #4c8c40;
-    --primary-hover: #57a04a;
-    --on-primary: #ffffff;
-    --muted-badge: #4a5644;
-    --selected: #2f5a29;
-    --on-selected: #ffffff;
-    --selected-meta: rgba(255, 255, 255, 0.78);
-    --selected-mark: transparent;
-    --bubble-in: #1f2a1b;
-    --bubble-out: #2e4d27;
-    --meta-in: #7f8a78;
-    --meta-out: #9fc58f;
-    --link: #8fcf7c;
-    --danger: #e0716b;
-    --shadow-bubble: 0 1px 1px rgba(0, 0, 0, 0.35);
-    --shadow-pop: 0 12px 32px rgba(0, 0, 0, 0.5);
-    --date-chip: rgba(28, 38, 24, 0.85);
-    --wp-base: #0e150c;
-    --wp-sage: #183019;
-    --wp-haze: #24391d;
-    --wp-mist: #121b10;
-    --wp-paper: #141a12;
-    --wp-ink: rgba(233, 170, 68, 0.085);
-    --wp-ink-soft: rgba(233, 170, 68, 0.06);
-    --wp-rule: rgba(231, 235, 225, 0.05);
-    --wp-margin: rgba(233, 170, 68, 0.3);
-    --wp-grain: 0.22;
-    color-scheme: dark;
-  }
+/* ── Бумага — светлая, тёплая: каштан и янтарь на кремовом ───────────────── */
+:root[data-palette='paper'] {
+  --bg-app: #fcfbf7;
+  --bg-chat: #ece5d6;
+  --pattern: rgba(96, 66, 30, 0.1);
+  --surface: #fffdf8;
+  --surface-2: #f3eee4;
+  --surface-3: #ebe4d6;
+  --line: #e7dfcf;
+  --text: #2b2219;
+  --text-2: #6b6152;
+  --text-3: #8f8574;
+  --primary: #6a4520;
+  --primary-hover: #553617;
+  --on-primary: #ffffff;
+  --accent: #e9aa44;
+  --on-accent: #2b2219;
+  --muted-badge: #bdb3a2;
+  --selected: #ece2cf;
+  --on-selected: var(--text);
+  --selected-meta: var(--text-2);
+  --selected-mark: transparent;
+  --bubble-in: #fffdf8;
+  --bubble-out: #efe2c6;
+  --meta-in: #8f8574;
+  --meta-out: #7a5a2e;
+  --link: #7a4a1c;
+  --danger: #b8443c;
+  --focus: #e9aa44;
+  --chrome: #35271a;
+  --chrome-accent: #e9aa44;
+  --shadow-bubble: 0 1px 1px rgba(60, 40, 20, 0.13);
+  --shadow-pop: 0 10px 30px rgba(60, 40, 20, 0.18), 0 2px 6px rgba(60, 40, 20, 0.1);
+  --date-chip: rgba(90, 60, 30, 0.55);
+  --wp-base: #e6dcc8;
+  --wp-sage: #ddcdae;
+  --wp-haze: #f2dcb0;
+  --wp-mist: #f4efe4;
+  --wp-paper: #f1ebdf;
+  --wp-ink: rgba(96, 66, 30, 0.12);
+  --wp-ink-soft: rgba(96, 66, 30, 0.085);
+  --wp-rule: rgba(96, 66, 30, 0.09);
+  --wp-margin: rgba(196, 96, 60, 0.45);
+  --wp-grain: 0.35;
+  color-scheme: light;
 }
 
-:root[data-theme='dark'] {
+/* ── Хвоя — тёмная, фирменная ─────────────────────────────────────────────── */
+:root[data-palette='pine'] {
   --bg-app: #172013;
   --bg-chat: #0f150c;
-  --pattern: rgba(233, 170, 68, 0.06);
+  --pattern: rgba(233, 170, 68, 0.07);
   --surface: #1c2618;
   --surface-2: #243020;
   --surface-3: #2c3a27;
   --line: #2a3625;
   --text: #e7ebe1;
   --text-2: #9ca694;
-  --text-3: #6f7a68;
+  --text-3: #7c8774;
   --primary: #4c8c40;
   --primary-hover: #57a04a;
   --on-primary: #ffffff;
+  --accent: #e9aa44;
+  --on-accent: #20301a;
   --muted-badge: #4a5644;
   --selected: #2f5a29;
   --on-selected: #ffffff;
@@ -119,13 +144,16 @@
   --selected-mark: transparent;
   --bubble-in: #1f2a1b;
   --bubble-out: #2e4d27;
-  --meta-in: #7f8a78;
-  --meta-out: #9fc58f;
+  --meta-in: #8a9583;
+  --meta-out: #a8cc98;
   --link: #8fcf7c;
   --danger: #e0716b;
+  --focus: #e9aa44;
+  --chrome: #20301a;
+  --chrome-accent: #e9aa44;
   --shadow-bubble: 0 1px 1px rgba(0, 0, 0, 0.35);
   --shadow-pop: 0 12px 32px rgba(0, 0, 0, 0.5);
-  --date-chip: rgba(28, 38, 24, 0.85);
+  --date-chip: rgba(28, 38, 24, 0.88);
   --wp-base: #0e150c;
   --wp-sage: #183019;
   --wp-haze: #24391d;
@@ -135,6 +163,100 @@
   --wp-ink-soft: rgba(233, 170, 68, 0.06);
   --wp-rule: rgba(231, 235, 225, 0.05);
   --wp-margin: rgba(233, 170, 68, 0.3);
+  --wp-grain: 0.22;
+  color-scheme: dark;
+}
+
+/* ── Чернила — тёмная, сине-чёрная: синие чернила и янтарь ────────────────── */
+:root[data-palette='ink'] {
+  --bg-app: #10151d;
+  --bg-chat: #0a0e15;
+  --pattern: rgba(130, 165, 220, 0.08);
+  --surface: #161c26;
+  --surface-2: #1d2531;
+  --surface-3: #252f3e;
+  --line: #232c3a;
+  --text: #e4e8ef;
+  --text-2: #99a4b5;
+  --text-3: #7a8597;
+  --primary: #5d8fd6;
+  --primary-hover: #6d9de0;
+  --on-primary: #ffffff;
+  --accent: #e9aa44;
+  --on-accent: #1a1f27;
+  --muted-badge: #3f4a5a;
+  --selected: #22324a;
+  --on-selected: #e4e8ef;
+  --selected-meta: #a9b6c9;
+  --selected-mark: transparent;
+  --bubble-in: #18202c;
+  --bubble-out: #22385a;
+  --meta-in: #8591a3;
+  --meta-out: #a8c3ea;
+  --link: #93b8f0;
+  --danger: #e0716b;
+  --focus: #e9aa44;
+  --chrome: #22324a;
+  --chrome-accent: #e9aa44;
+  --shadow-bubble: 0 1px 1px rgba(0, 0, 0, 0.4);
+  --shadow-pop: 0 12px 32px rgba(0, 0, 0, 0.55);
+  --date-chip: rgba(22, 28, 38, 0.9);
+  --wp-base: #0b1018;
+  --wp-sage: #142238;
+  --wp-haze: #1c2c47;
+  --wp-mist: #0f1520;
+  --wp-paper: #10151e;
+  --wp-ink: rgba(130, 165, 220, 0.085);
+  --wp-ink-soft: rgba(130, 165, 220, 0.06);
+  --wp-rule: rgba(228, 232, 239, 0.05);
+  --wp-margin: rgba(233, 170, 68, 0.3);
+  --wp-grain: 0.22;
+  color-scheme: dark;
+}
+
+/* ── Библиотека — тёмная, коричнево-чёрная: латунь и бордовый переплёт ────── */
+:root[data-palette='library'] {
+  --bg-app: #18130f;
+  --bg-chat: #100c09;
+  --pattern: rgba(215, 169, 76, 0.075);
+  --surface: #201913;
+  --surface-2: #2a2119;
+  --surface-3: #33291f;
+  --line: #33281e;
+  --text: #ede4d6;
+  --text-2: #ad9f8a;
+  --text-3: #8b7f6d;
+  --primary: #c49a52;
+  --primary-hover: #d2a961;
+  --on-primary: #1a140e;
+  --accent: #b4483c;
+  --on-accent: #ffffff;
+  --muted-badge: #54473a;
+  --selected: #3a2c1d;
+  --on-selected: #ede4d6;
+  --selected-meta: #bfae94;
+  --selected-mark: transparent;
+  --bubble-in: #231c15;
+  --bubble-out: #3d2f1d;
+  --meta-in: #958873;
+  --meta-out: #d6b97f;
+  --link: #e2bf7c;
+  --danger: #e0716b;
+  --focus: #c49a52;
+  --chrome: #2e2318;
+  --chrome-accent: #d6b06a;
+  --shadow-bubble: 0 1px 1px rgba(0, 0, 0, 0.4);
+  --shadow-pop: 0 12px 32px rgba(0, 0, 0, 0.55);
+  --date-chip: rgba(32, 25, 19, 0.9);
+  --wp-base: #110d0a;
+  --wp-sage: #2a1d12;
+  --wp-haze: #3a1d17;
+  --wp-mist: #16110d;
+  --wp-paper: #17120e;
+  --wp-ink: rgba(215, 169, 76, 0.085);
+  --wp-ink-soft: rgba(215, 169, 76, 0.06);
+  --wp-rule: rgba(237, 228, 214, 0.05);
+  --wp-margin: rgba(180, 72, 60, 0.4);
   --wp-grain: 0.22;
   color-scheme: dark;
 }
@@ -155,8 +277,8 @@ body {
   margin: 0;
   background: var(--bg-app);
   color: var(--text);
-  font-family: var(--serif);
-  font-size: 16px;
+  font-family: var(--font-main);
+  font-size: 1rem;
   line-height: 1.45;
   -webkit-font-smoothing: antialiased;
   -webkit-tap-highlight-color: transparent;

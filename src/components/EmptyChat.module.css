@@ -22,4 +22,5 @@ button.chip {
 }
 button.chip:hover {
   background: var(--primary);
+  color: var(--on-primary);
 }

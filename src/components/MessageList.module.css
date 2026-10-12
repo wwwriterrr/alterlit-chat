@@ -51,7 +51,7 @@
 }
 .chipBtn {
   margin-left: 6px;
-  color: var(--amber);
+  color: var(--chrome-accent);
   font-weight: 600;
   text-decoration: underline;
 }

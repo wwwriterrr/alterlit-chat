@@ -1,23 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { setTheme, setWallpaper, type ThemePref } from '../store/uiSlice';
-import { WALLPAPERS } from '../utils/wallpaper';
+import { setAppearanceOpen } from '../store/uiSlice';
 import { logoutUrl } from '../utils/people';
 import Avatar from './Avatar';
-import { IconLogout, IconMenu, IconMoon, IconSun } from './Icons';
+import { IconLogout, IconMenu, IconPalette } from './Icons';
 import s from './MainMenu.module.css';
-
-const THEMES: { value: ThemePref; label: string }[] = [
-  { value: 'system', label: 'Как в системе' },
-  { value: 'light', label: 'Светлая' },
-  { value: 'dark', label: 'Тёмная' },
-];
 
 export default function MainMenu() {
   const dispatch = useAppDispatch();
   const user = useAppSelector((st) => st.auth.user);
-  const theme = useAppSelector((st) => st.ui.theme);
-  const wallpaper = useAppSelector((st) => st.ui.wallpaper);
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -49,42 +40,17 @@ export default function MainMenu() {
               </div>
             </div>
           )}
-          <div className={s.group} role="group" aria-label="Тема">
-            <div className={s.groupTitle}>
-              {theme === 'dark' ? <IconMoon width={18} height={18} /> : <IconSun width={18} height={18} />}
-              Тема оформления
-            </div>
-            <div className={s.segments}>
-              {THEMES.map((t) => (
-                <button
-                  key={t.value}
-                  role="menuitemradio"
-                  aria-checked={theme === t.value}
-                  className={s.segment}
-                  onClick={() => dispatch(setTheme(t.value))}
-                >
-                  {t.label}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div className={s.group} role="radiogroup" aria-label="Обои чата">
-            <div className={s.groupTitle}>Обои чата</div>
-            <div className={s.wallpapers}>
-              {WALLPAPERS.map((w) => (
-                <button
-                  key={w.id}
-                  role="radio"
-                  aria-checked={wallpaper === w.id}
-                  className={s.wp}
-                  onClick={() => dispatch(setWallpaper(w.id))}
-                >
-                  <span className={`${s.wpPreview} chat-wallpaper`} data-wp={w.id} aria-hidden />
-                  <span className={s.wpLabel}>{w.label}</span>
-                </button>
-              ))}
-            </div>
-          </div>
+          <button
+            role="menuitem"
+            className={s.item}
+            onClick={() => {
+              setOpen(false);
+              dispatch(setAppearanceOpen(true));
+            }}
+          >
+            <IconPalette width={20} height={20} />
+            Оформление
+          </button>
           <a role="menuitem" className={`${s.item} ${s.danger}`} href={logoutUrl()}>
             <IconLogout width={20} height={20} />
             Выйти из аккаунта
