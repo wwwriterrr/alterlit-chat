@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { IconChevronLeft, IconChevronRight, IconClose, IconDownload } from './Icons';
 import s from './Lightbox.module.css';
 
@@ -37,7 +38,8 @@ export default function Lightbox({
     return () => window.removeEventListener('keydown', onKey);
   }, [images, index, hasPrev, hasNext, onChange, onClose]);
 
-  return (
+  // порталом в <body>: внутри области чата z-index не перекроет сайдбар (см. MessageMenu)
+  return createPortal(
     <div className={s.root} role="dialog" aria-modal="true" aria-label="Просмотр изображения" onClick={onClose}>
       <div className={s.bar} onClick={(e) => e.stopPropagation()}>
         <span className={s.counter}>
@@ -77,6 +79,7 @@ export default function Lightbox({
           <IconChevronRight width={30} height={30} />
         </button>
       )}
-    </div>
+    </div>,
+    document.body,
   );
 }

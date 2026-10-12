@@ -1,5 +1,10 @@
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import s from './MessageMenu.module.css';
+
+// Меню и подтверждения — порталом в <body>: область чата с обоями — отдельный
+// контекст наложения (isolation: isolate), и внутри неё z-index не поднимет окно
+// выше кнопки «Новый чат» в соседнем сайдбаре.
 
 export interface MenuItem {
   key: string;
@@ -53,7 +58,7 @@ export function MessageMenu({ x, y, items, onClose }: { x: number; y: number; it
     };
   }, [onClose]);
 
-  return (
+  return createPortal(
     <div ref={ref} className={s.menu} style={pos} role="menu">
       {items.map((item) => (
         <button
@@ -70,7 +75,8 @@ export function MessageMenu({ x, y, items, onClose }: { x: number; y: number; it
           <span className={s.label}>{item.label}</span>
         </button>
       ))}
-    </div>
+    </div>,
+    document.body,
   );
 }
 
@@ -100,7 +106,7 @@ export function ConfirmDialog({
     };
   }, [onCancel]);
 
-  return (
+  return createPortal(
     <div className={s.backdrop} onPointerDown={(e) => e.target === e.currentTarget && onCancel()}>
       <div className={s.dialog} role="alertdialog" aria-modal="true" aria-labelledby="confirm-title" aria-describedby="confirm-text">
         <h3 id="confirm-title" className={s.title}>
@@ -118,6 +124,7 @@ export function ConfirmDialog({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
