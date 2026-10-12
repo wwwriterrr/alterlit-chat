@@ -1,0 +1,24 @@
+.wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3em;
+  max-width: 100%;
+  min-width: 0;
+  vertical-align: bottom;
+}
+.text {
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.badge {
+  flex: none;
+  width: 0.95em;
+  height: 0.95em;
+  /* цвета значка одинаковые во всех палитрах */
+  fill: #3b6ef3;
+}
+.badge[data-kind='owner'] {
+  fill: #d50000;
+}

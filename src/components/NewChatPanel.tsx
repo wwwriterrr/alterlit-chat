@@ -4,7 +4,9 @@ import type { UserSearchResult } from '../api/types';
 import { SEARCH_MIN_LENGTH, useUserSearch } from '../hooks/useUserSearch';
 import { useAppDispatch } from '../store/hooks';
 import { startChatWith } from '../store/roomsSlice';
+import { badgeOf } from '../utils/people';
 import Avatar from './Avatar';
+import PersonName from './PersonName';
 import { IconBack, IconClose, IconSearch } from './Icons';
 import s from './NewChatPanel.module.css';
 
@@ -134,7 +136,9 @@ export default function NewChatPanel({ onClose }: { onClose: () => void }) {
                 >
                   <Avatar id={u.id} name={u.name || u.username} src={u.avatar} size={46} />
                   <span className={s.text}>
-                    <span className={s.name}>{u.name || u.username}</span>
+                    <span className={s.name}>
+                      <PersonName name={u.name || u.username} badge={badgeOf(u)} />
+                    </span>
                     <span className={s.login}>@{u.username}</span>
                   </span>
                   {opening === u.id ? (

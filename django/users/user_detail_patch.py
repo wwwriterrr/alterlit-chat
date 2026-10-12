@@ -83,6 +83,8 @@ from api.users import views
 
 urlpatterns = [
     # … session/self/ и остальное
+    # Имена параметров — ровно pk и username: по ним UserDetail.get_object
+    # выбирает поле поиска (<int:id> или <int:user_id> → AssertionError и 500).
     path('<int:pk>/', views.UserDetail.as_view(), name='user-detail'),
     # символы логина Django: буквы, цифры и @ . + - _
     re_path(r'^by-username/(?P<username>[\w.@+-]+)/$', views.UserDetail.as_view(),

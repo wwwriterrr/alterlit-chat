@@ -6,6 +6,7 @@ import { formatListDate } from '../utils/date';
 import { plainText } from '../utils/html';
 import { peerIdOf } from '../utils/people';
 import Avatar from './Avatar';
+import PersonName from './PersonName';
 import s from './RoomItem.module.css';
 
 const LONG_PRESS_MS = 450;
@@ -22,7 +23,7 @@ function RoomItem({ room, active, onMenu }: Props) {
   const cancelPress = () => window.clearTimeout(pressTimer.current);
   const meId = useAppSelector((st) => st.auth.user?.id);
   const peerId = peerIdOf(room.members, meId);
-  const { name, known, avatar } = usePeer(peerId);
+  const { name, known, avatar, badge } = usePeer(peerId);
   const isTyping = useAppSelector((st) => Boolean(st.rooms.typingUntil[room.id]));
   const preview = plainText(room.last_message_content) || (room.last_message_date ? 'Вложение' : 'Нет сообщений');
 
@@ -59,7 +60,9 @@ function RoomItem({ room, active, onMenu }: Props) {
       <Avatar id={peerId} name={known ? name : ''} src={avatar} size={54} />
       <span className={s.body}>
         <span className={s.row}>
-          <span className={s.name}>{name}</span>
+          <span className={s.name}>
+            <PersonName name={name} badge={badge} />
+          </span>
           <time className={s.date} dateTime={room.last_message_date ?? undefined}>
             {formatListDate(room.last_message_date)}
           </time>

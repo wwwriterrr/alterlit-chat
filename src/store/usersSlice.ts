@@ -1,16 +1,26 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import type { RoomMember } from '../api/types';
+import { badgeOf, type PersonBadge } from '../utils/people';
 
 // Профили собеседников (имя, аватар) приходят в RoomSerializer.members.
 // Пока бэкенд отдаёт только id, логины берутся из сообщений (sender_username).
 // Оба источника кэшируются в localStorage, чтобы список не «мигал» при загрузке.
 const KEY = 'alterlit-chat-people';
 
+/** То, что храним о собеседнике. */
+export interface PersonProfile {
+  id: number;
+  username: string;
+  name: string | null;
+  avatar: string | null;
+  badge: PersonBadge;
+}
+
 interface UsersState {
   /** id → логин из sender_username */
   usernames: Record<number, string>;
   /** id → профиль из members (приоритетнее логина) */
-  profiles: Record<number, RoomMember>;
+  profiles: Record<number, PersonProfile>;
 }
 
 function load(): UsersState {
@@ -48,8 +58,22 @@ const usersSlice = createSlice({
       let changed = false;
       for (const m of action.payload) {
         const prev = state.profiles[m.id];
-        if (!prev || prev.username !== m.username || prev.name !== m.name || prev.avatar !== m.avatar) {
-          state.profiles[m.id] = { id: m.id, username: m.username, name: m.name ?? null, avatar: m.avatar ?? null };
+        const next: PersonProfile = {
+          id: m.id,
+          username: m.username,
+          name: m.name ?? null,
+          avatar: m.avatar ?? null,
+          // старый бэкенд без is_staff — оставляем, что знали
+          badge: m.is_staff === undefined ? (prev?.badge ?? badgeOf(m)) : badgeOf(m),
+        };
+        if (
+          !prev ||
+          prev.username !== next.username ||
+          prev.name !== next.name ||
+          prev.avatar !== next.avatar ||
+          prev.badge !== next.badge
+        ) {
+          state.profiles[m.id] = next;
           changed = true;
         }
       }

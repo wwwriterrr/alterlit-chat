@@ -12,6 +12,17 @@ export function initials(name: string) {
   return (parts[0][0] + parts[1][0]).toUpperCase();
 }
 
+/** Значок рядом с именем: staff — синий (is_staff), owner — красный (владелец сайта). */
+export type PersonBadge = 'staff' | 'owner' | null;
+
+/** id владельца сайта — у него красный значок. */
+const OWNER_ID = 79691;
+
+export function badgeOf(member: { id: number; is_staff?: boolean }): PersonBadge {
+  if (member.id === OWNER_ID) return 'owner';
+  return member.is_staff ? 'staff' : null;
+}
+
 export function peerIdOf(members: number[], meId: number | undefined) {
   return members.find((m) => m !== meId) ?? members[0];
 }

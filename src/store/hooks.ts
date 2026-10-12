@@ -13,5 +13,6 @@ export function usePeer(peerId: number | undefined) {
   const username = useAppSelector((s) =>
     peerId === undefined ? undefined : (s.users.profiles[peerId]?.username ?? s.users.usernames[peerId]),
   );
-  return { name: name ?? 'Собеседник', known: name !== undefined, avatar, username };
+  const badge = useAppSelector((s) => (peerId === undefined ? null : (s.users.profiles[peerId]?.badge ?? null)));
+  return { name: name ?? 'Собеседник', known: name !== undefined, avatar, username, badge };
 }

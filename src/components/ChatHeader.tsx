@@ -5,6 +5,7 @@ import { useAppDispatch, useAppSelector, usePeer } from '../store/hooks';
 import { askDeleteRoom } from '../store/uiSlice';
 import { peerIdOf, profileUrl } from '../utils/people';
 import Avatar from './Avatar';
+import PersonName from './PersonName';
 import { IconBack, IconMore, IconTrash, IconUser } from './Icons';
 import { MessageMenu } from './MessageMenu';
 import s from './ChatHeader.module.css';
@@ -17,7 +18,7 @@ export default function ChatHeader({ roomId, socketStatus }: { roomId: number; s
     st.messages.byRoom[roomId]?.items.find((m) => m.sender_id !== meId)?.sender_id,
   );
   const peerId = room ? peerIdOf(room.members, meId) : fallbackPeer;
-  const { name, known, avatar, username } = usePeer(peerId);
+  const { name, known, avatar, username, badge } = usePeer(peerId);
   const isTyping = useAppSelector((st) => Boolean(st.rooms.typingUntil[roomId]));
   const dispatch = useAppDispatch();
   const [menuAt, setMenuAt] = useState<{ x: number; y: number } | null>(null);
@@ -33,7 +34,7 @@ export default function ChatHeader({ roomId, socketStatus }: { roomId: number; s
       </Link>
       {peerId !== undefined && <Avatar id={peerId} name={known ? name : ''} src={avatar} size={40} />}
       <div className={s.text}>
-        <h2 className={s.name}>{peerId !== undefined ? name : 'Диалог'}</h2>
+        <h2 className={s.name}>{peerId !== undefined ? <PersonName name={name} badge={badge} /> : 'Диалог'}</h2>
         {subtitle && (
           <div className={s.sub} data-tone={subtitle.tone} aria-live="polite">
             {subtitle.text}

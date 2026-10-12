@@ -1,4 +1,4 @@
-from django.contrib.auth.models import User
+from django.contrib.auth.models import Group, User
 from django.db import transaction
 from django.db.models import Case, Count, IntegerField, OuterRef, Prefetch, Q, Subquery, Value, When
 from django.db.models.functions import Coalesce
@@ -32,6 +32,20 @@ from alterlit.channels_utils import (
 )
 
 
+# ---------- Карточка пользователя (ChatMemberSerializer) ----------
+def member_cards(qs=None):
+    """
+    User-queryset под ChatMemberSerializer: id, username, is_staff, профиль и группы.
+    Profile «широкий» (settings, balance, коды сброса пароля…) — тянем только нужное;
+    группы — одним запросом на всю выдачу и только имена.
+    """
+    qs = User.objects.all() if qs is None else qs
+    return (qs
+            .select_related('profile')
+            .only('id', 'username', 'is_staff', 'profile__nickname', 'profile__avatar')
+            .prefetch_related(Prefetch('groups', queryset=Group.objects.only('name'))))
+
+
 # ---------- Комнаты пользователя (общий queryset) ----------
 def rooms_for(user):
     """
@@ -51,12 +65,6 @@ def rooms_for(user):
               .annotate(c=Count('pk'))
               .values('c'))
 
-    # Profile «широкий» (settings, balance, коды сброса пароля…) —
-    # тянем только то, что нужно карточке участника
-    members_qs = (User.objects
-                  .select_related('profile')
-                  .only('id', 'username', 'profile__nickname', 'profile__avatar'))
-
     return (Room.objects
             .filter(members=user)
             # Profile.deleted_rooms (related_name='deleted_rooms') → обратная связь Room→Profile;
@@ -67,7 +75,7 @@ def rooms_for(user):
                 last_message_date=Subquery(last.values('date')[:1]),
                 last_message_content=Subquery(last.values('content')[:1]),
             )
-            .prefetch_related(Prefetch('members', queryset=members_qs)))
+            .prefetch_related(Prefetch('members', queryset=member_cards())))
 
 
 def mark_room_read(user, room):
@@ -286,15 +294,13 @@ def search_users(request):
               .filter(members=OuterRef('pk'))
               .values('pk')[:1])
 
-    users = (User.objects
+    users = (member_cards()
              .filter(is_active=True)
              .filter(Q(profile__nickname__icontains=q) | Q(username__icontains=q))
              .exclude(pk=user.pk)
              .exclude(profile__global_hidden=True)
              # Profile.blacklist (related_name='blacklist'): кандидат занёс меня в ЧС
              .exclude(profile__blacklist=user)
-             .select_related('profile')
-             .only('id', 'username', 'profile__nickname', 'profile__avatar')
              .annotate(room_id=Subquery(dialog, output_field=IntegerField()))
              .annotate(rank=Case(
                  When(Q(username__iexact=q) | Q(profile__nickname__iexact=q), then=Value(0)),

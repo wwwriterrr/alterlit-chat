@@ -35,6 +35,9 @@ export interface RoomMember {
   username: string;
   name?: string | null;
   avatar?: string | null;
+  is_staff?: boolean;
+  /** имена групп пользователя на сайте */
+  groups?: string[];
 }
 
 /** Результат GET /chat/users/search/ — участник + id уже существующего диалога. */
