@@ -1,24 +1,23 @@
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { Link } from 'react-router';
 import type { SocketStatus } from '../hooks/useRoomSocket';
 import { useAppDispatch, useAppSelector, usePeer } from '../store/hooks';
 import { askDeleteRooms } from '../store/uiSlice';
-import { peerIdOf, profileUrl } from '../utils/people';
+import { useBlockState } from '../hooks/useBlockState';
+import { useRoomPeer } from '../hooks/useRoomPeer';
+import { setBlocked } from '../store/blacklistSlice';
+import { profileUrl } from '../utils/people';
 import Avatar from './Avatar';
 import PersonName from './PersonName';
-import { IconBack, IconMore, IconTrash, IconUser } from './Icons';
-import { MessageMenu } from './MessageMenu';
+import { IconBack, IconBlock, IconMore, IconTrash, IconUser } from './Icons';
+import { ConfirmDialog, MessageMenu } from './MessageMenu';
 import s from './ChatHeader.module.css';
 
 export default function ChatHeader({ roomId, socketStatus }: { roomId: number; socketStatus: SocketStatus }) {
-  const meId = useAppSelector((st) => st.auth.user?.id);
-  const room = useAppSelector((st) => st.rooms.list.find((r) => r.id === roomId));
-  // если комнаты ещё нет в списке — берём собеседника из сообщений
-  const fallbackPeer = useAppSelector((st) =>
-    st.messages.byRoom[roomId]?.items.find((m) => m.sender_id !== meId)?.sender_id,
-  );
-  const peerId = room ? peerIdOf(room.members, meId) : fallbackPeer;
+  const { room, peerId } = useRoomPeer(roomId);
   const { name, known, avatar, username, badge } = usePeer(peerId);
+  const { state: block, busy: blockBusy } = useBlockState(peerId);
+  const [confirmBlock, setConfirmBlock] = useState(false);
   const isTyping = useAppSelector((st) => Boolean(st.rooms.typingUntil[roomId]));
   const dispatch = useAppDispatch();
   const [menuAt, setMenuAt] = useState<{ x: number; y: number } | null>(null);
@@ -32,15 +31,17 @@ export default function ChatHeader({ roomId, socketStatus }: { roomId: number; s
       <Link to="/" className={s.back} aria-label="К списку диалогов">
         <IconBack />
       </Link>
-      {peerId !== undefined && <Avatar id={peerId} name={known ? name : ''} src={avatar} size={40} />}
-      <div className={s.text}>
-        <h2 className={s.name}>{peerId !== undefined ? <PersonName name={name} badge={badge} /> : 'Диалог'}</h2>
-        {subtitle && (
-          <div className={s.sub} data-tone={subtitle.tone} aria-live="polite">
-            {subtitle.text}
-          </div>
-        )}
-      </div>
+      <PeerLink username={username} label={known ? `Открыть профиль «${name}» в новой вкладке` : undefined}>
+        {peerId !== undefined && <Avatar id={peerId} name={known ? name : ''} src={avatar} size={40} />}
+        <div className={s.text}>
+          <h2 className={s.name}>{peerId !== undefined ? <PersonName name={name} badge={badge} /> : 'Диалог'}</h2>
+          {subtitle && (
+            <div className={s.sub} data-tone={subtitle.tone} aria-live="polite">
+              {subtitle.text}
+            </div>
+          )}
+        </div>
+      </PeerLink>
       {room && (
         <button
           className={s.more}
@@ -78,6 +79,25 @@ export default function ChatHeader({ roomId, socketStatus }: { roomId: number; s
                   },
                 ]
               : []),
+            // состояние неизвестно (ручки нет или ошибка) — пункт не показываем
+            ...(peerId !== undefined && block && !blockBusy
+              ? [
+                  block.blocked
+                    ? {
+                        key: 'unblock',
+                        label: 'Разблокировать',
+                        icon: <IconBlock />,
+                        onSelect: () => dispatch(setBlocked(peerId, false)),
+                      }
+                    : {
+                        key: 'block',
+                        label: 'Заблокировать',
+                        icon: <IconBlock />,
+                        danger: true,
+                        onSelect: () => setConfirmBlock(true),
+                      },
+                ]
+              : []),
             {
               key: 'delete',
               label: 'Удалить чат',
@@ -88,6 +108,28 @@ export default function ChatHeader({ roomId, socketStatus }: { roomId: number; s
           ]}
         />
       )}
+      {confirmBlock && peerId !== undefined && (
+        <ConfirmDialog
+          title={known ? `Заблокировать «${name}»?` : 'Заблокировать собеседника?'}
+          text="Вы не сможете писать друг другу, пока блокировка не снята. Переписка останется. Разблокировать можно в меню чата или в разделе «Заблокированные»."
+          confirmLabel="Заблокировать"
+          onCancel={() => setConfirmBlock(false)}
+          onConfirm={() => {
+            setConfirmBlock(false);
+            dispatch(setBlocked(peerId, true));
+          }}
+        />
+      )}
     </header>
+  );
+}
+
+/** Аватар и имя собеседника — ссылка на его профиль на сайте (в новой вкладке), если логин известен. */
+function PeerLink({ username, label, children }: { username?: string; label?: string; children: ReactNode }) {
+  if (!username) return <div className={s.peer}>{children}</div>;
+  return (
+    <a className={s.peer} href={profileUrl(username)} target="_blank" rel="noopener noreferrer" title={label}>
+      {children}
+    </a>
   );
 }

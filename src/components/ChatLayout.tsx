@@ -2,7 +2,8 @@ import { Outlet, useMatch } from 'react-router';
 import { useEffect } from 'react';
 import { useChatStream } from '../hooks/useChatStream';
 import { useRoomsSync } from '../hooks/useRoomsSync';
-import { useAppSelector } from '../store/hooks';
+import { loadBlacklist } from '../store/blacklistSlice';
+import { useAppDispatch, useAppSelector } from '../store/hooks';
 import Sidebar from './Sidebar';
 import Toast from './Toast';
 import DeleteRoomConfirm from './DeleteRoomConfirm';
@@ -11,6 +12,10 @@ import s from './ChatLayout.module.css';
 export default function ChatLayout() {
   const streamStatus = useChatStream();
   useRoomsSync(streamStatus === 'open');
+  const dispatch = useAppDispatch();
+  useEffect(() => {
+    dispatch(loadBlacklist());
+  }, [dispatch]);
 
   // счётчик непрочитанного во вкладке браузера, как у мессенджеров
   const unread = useAppSelector((st) => st.rooms.list.reduce((sum, r) => sum + (r.unread_count || 0), 0));

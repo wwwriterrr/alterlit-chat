@@ -147,6 +147,15 @@ class RoomMessagesList(generics.ListCreateAPIView):
     def create(self, request, *args, **kwargs):
         room = self.get_room()
 
+        # чёрный список (Profile.blacklist) — в обе стороны; история остаётся, писать нельзя
+        peers = room.members.exclude(pk=request.user.pk)
+        if peers.filter(profile__blacklist=request.user).exists():
+            return Response({'detail': 'Пользователь ограничил вам личные сообщения'},
+                            status=status.HTTP_403_FORBIDDEN)
+        if request.user.profile.blacklist.filter(pk__in=peers).exists():
+            return Response({'detail': 'Вы заблокировали этого пользователя'},
+                            status=status.HTTP_403_FORBIDDEN)
+
         in_serializer = MessageCreateSerializer(data=request.data)
         in_serializer.is_valid(raise_exception=True)
 

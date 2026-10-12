@@ -40,6 +40,25 @@ export interface RoomMember {
   groups?: string[];
 }
 
+/** Карточка из /api/v1/users/… (UserDetailSerializer): псевдоним может быть пустым. */
+export interface UserCard {
+  id: number;
+  username: string;
+  nickname: string | null;
+  avatar: string | null;
+  is_staff?: boolean;
+  groups?: string[];
+}
+
+/** Блокировки между мной и пользователем: GET/PUT/DELETE /api/v1/users/blacklist/<id>/ */
+export interface BlockState {
+  user_id: number;
+  /** я заблокировал его */
+  blocked: boolean;
+  /** он заблокировал меня */
+  blocked_me: boolean;
+}
+
 /** Результат GET /chat/users/search/ — участник + id уже существующего диалога. */
 export interface UserSearchResult extends RoomMember {
   room_id: number | null;

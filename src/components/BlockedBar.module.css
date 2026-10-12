@@ -1,0 +1,41 @@
+.dock {
+  flex: none;
+  padding: 6px 16px 14px;
+  padding-bottom: max(14px, env(safe-area-inset-bottom));
+}
+.bar {
+  max-width: 780px;
+  min-height: 52px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  padding: 8px 16px;
+  border-radius: 18px;
+  background: var(--surface);
+  box-shadow: var(--shadow-bubble);
+  font-family: var(--sans);
+  font-size: 0.875rem;
+  color: var(--text-2);
+  text-align: center;
+}
+.icon {
+  flex: none;
+  color: var(--text-3);
+}
+.action {
+  padding: 6px 14px;
+  border-radius: 16px;
+  font-weight: 600;
+  color: var(--primary);
+  transition: background 0.12s;
+}
+.action:hover:not(:disabled) {
+  background: var(--surface-2);
+}
+.action:disabled {
+  opacity: 0.5;
+  cursor: default;
+}

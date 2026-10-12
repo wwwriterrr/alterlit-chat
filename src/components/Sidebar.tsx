@@ -5,8 +5,7 @@ import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { fetchMoreRooms, fetchRooms, markRoomRead } from '../store/roomsSlice';
 import {
   askDeleteRooms,
-  setAppearanceOpen,
-  setNewChatOpen,
+  openPanel,
   startSelecting,
   stopSelecting,
   toggleSelected,
@@ -17,6 +16,7 @@ import { peerIdOf } from '../utils/people';
 import { CHATS, plural } from '../utils/plural';
 import { IconCheck, IconClose, IconEdit, IconSearch, IconSelect, IconTrash } from './Icons';
 import AppearancePanel from './AppearancePanel';
+import BlacklistPanel from './BlacklistPanel';
 import NewChatPanel from './NewChatPanel';
 import { MessageMenu, type MenuItem } from './MessageMenu';
 import MainMenu from './MainMenu';
@@ -33,11 +33,9 @@ export default function Sidebar() {
   const users = useAppSelector((st) => st.users);
   const [query, setQuery] = useState('');
   const [menu, setMenu] = useState<{ room: Room; x: number; y: number } | null>(null);
-  const newChat = useAppSelector((st) => st.ui.newChatOpen);
-  const setNewChat = useCallback((open: boolean) => dispatch(setNewChatOpen(open)), [dispatch]);
-  const closeNewChat = useCallback(() => setNewChat(false), [setNewChat]);
-  const appearanceOpen = useAppSelector((st) => st.ui.appearanceOpen);
-  const closeAppearance = useCallback(() => dispatch(setAppearanceOpen(false)), [dispatch]);
+  const panel = useAppSelector((st) => st.ui.panel);
+  const setNewChat = useCallback((open: boolean) => dispatch(openPanel(open ? 'newChat' : null)), [dispatch]);
+  const closePanel = useCallback(() => dispatch(openPanel(null)), [dispatch]);
   const noRooms = status === 'ready' && list.length === 0;
   const openMenu = useCallback((room: Room, x: number, y: number) => setMenu({ room, x, y }), []);
   const closeMenu = useCallback(() => setMenu(null), []);
@@ -79,17 +77,18 @@ export default function Sidebar() {
   // следующая страница, когда конец списка показался на экране
   useEffect(() => {
     const el = sentinelRef.current;
-    if (!el || !hasMore || newChat || appearanceOpen) return;
+    if (!el || !hasMore || panel) return;
     const io = new IntersectionObserver((e) => e[0].isIntersecting && dispatch(fetchMoreRooms()), {
       root: navRef.current,
       rootMargin: '300px',
     });
     io.observe(el);
     return () => io.disconnect();
-  }, [hasMore, newChat, appearanceOpen, dispatch, list.length]);
+  }, [hasMore, panel, dispatch, list.length]);
 
-  if (newChat) return <NewChatPanel onClose={closeNewChat} />;
-  if (appearanceOpen) return <AppearancePanel onClose={closeAppearance} />;
+  if (panel === 'newChat') return <NewChatPanel onClose={closePanel} />;
+  if (panel === 'appearance') return <AppearancePanel onClose={closePanel} />;
+  if (panel === 'blacklist') return <BlacklistPanel onClose={closePanel} />;
 
   return (
     <>

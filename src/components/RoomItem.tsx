@@ -6,7 +6,7 @@ import { formatListDate } from '../utils/date';
 import { plainText } from '../utils/html';
 import { peerIdOf } from '../utils/people';
 import Avatar from './Avatar';
-import { IconCheck } from './Icons';
+import { IconBlock, IconCheck } from './Icons';
 import PersonName from './PersonName';
 import s from './RoomItem.module.css';
 
@@ -30,16 +30,25 @@ function RoomItem({ room, active, onMenu, selecting = false, checked = false, on
   const peerId = peerIdOf(room.members, meId);
   const { name, known, avatar, badge } = usePeer(peerId);
   const isTyping = useAppSelector((st) => Boolean(st.rooms.typingUntil[room.id]));
+  const blocked = useAppSelector((st) => Boolean(st.blacklist.byPeer[peerId]?.blocked));
   const preview = plainText(room.last_message_content) || (room.last_message_date ? 'Вложение' : 'Нет сообщений');
 
   const content = (
     <>
-      <Avatar id={peerId} name={known ? name : ''} src={avatar} size={54} />
+      <span className={s.avatar} data-blocked={blocked || undefined}>
+        <Avatar id={peerId} name={known ? name : ''} src={avatar} size={54} />
+      </span>
       <span className={s.body}>
         <span className={s.row}>
           <span className={s.name}>
             <PersonName name={name} badge={badge} />
           </span>
+          {blocked && (
+            <span className={s.blocked} title="Вы заблокировали пользователя">
+              <IconBlock width={15} height={15} aria-hidden />
+              <span className="visually-hidden">Заблокирован</span>
+            </span>
+          )}
           <time className={s.date} dateTime={room.last_message_date ?? undefined}>
             {formatListDate(room.last_message_date)}
           </time>

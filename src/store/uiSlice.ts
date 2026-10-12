@@ -4,6 +4,8 @@ import { loadAppearance, saveAppearance, type Appearance } from '../utils/appear
 import { WALLPAPERS, type WallpaperId } from '../utils/wallpaper';
 
 export type ThemePref = 'system' | 'light' | 'dark';
+/** Панель на месте списка диалогов. */
+export type SidebarPanel = 'newChat' | 'appearance' | 'blacklist';
 const KEY = 'alterlit-chat-theme';
 const WP_KEY = 'alterlit-chat-wallpaper';
 
@@ -44,10 +46,8 @@ const uiSlice = createSlice({
     confirmDeleteRooms: null as number[] | null,
     /** режим выбора в списке диалогов: id отмеченных; null — обычный список */
     selectedRooms: null as number[] | null,
-    /** панель «Новый чат» вместо списка диалогов */
-    newChatOpen: false,
-    /** панель «Оформление» вместо списка диалогов */
-    appearanceOpen: false,
+    /** панель вместо списка диалогов; null — список */
+    panel: null as SidebarPanel | null,
   },
   reducers: {
     showToast: {
@@ -58,19 +58,9 @@ const uiSlice = createSlice({
         return { payload: { text, action: toastAction } };
       },
     },
-    setNewChatOpen(state, action: PayloadAction<boolean>) {
-      state.newChatOpen = action.payload;
-      if (action.payload) {
-        state.appearanceOpen = false;
-        state.selectedRooms = null;
-      }
-    },
-    setAppearanceOpen(state, action: PayloadAction<boolean>) {
-      state.appearanceOpen = action.payload;
-      if (action.payload) {
-        state.newChatOpen = false;
-        state.selectedRooms = null;
-      }
+    openPanel(state, action: PayloadAction<SidebarPanel | null>) {
+      state.panel = action.payload;
+      if (action.payload) state.selectedRooms = null;
     },
     setAppearance(state, action: PayloadAction<Partial<Appearance>>) {
       state.appearance = { ...state.appearance, ...action.payload };
@@ -118,7 +108,6 @@ const uiSlice = createSlice({
 export const {
   setTheme,
   setAppearance,
-  setAppearanceOpen,
   setWallpaper,
   showToast,
   hideToast,
@@ -126,6 +115,6 @@ export const {
   startSelecting,
   toggleSelected,
   stopSelecting,
-  setNewChatOpen,
+  openPanel,
 } = uiSlice.actions;
 export default uiSlice.reducer;

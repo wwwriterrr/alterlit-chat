@@ -105,3 +105,23 @@
   box-shadow: none;
   color: var(--on-primary);
 }
+
+/* ── собеседник заблокирован ── */
+.avatar {
+  flex: none;
+  display: flex;
+  transition: filter 0.2s, opacity 0.2s;
+}
+.avatar[data-blocked] {
+  filter: grayscale(1);
+  opacity: 0.6;
+}
+.blocked {
+  flex: none;
+  display: flex;
+  /* серый, а не красный: рядом может стоять красный значок владельца сайта */
+  color: var(--text-3);
+}
+.item[data-active] .blocked {
+  color: var(--selected-meta);
+}

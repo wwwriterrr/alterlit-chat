@@ -2,7 +2,7 @@ import type { AxiosProgressEvent } from 'axios';
 import { http } from './http';
 
 const USERS_SELF = import.meta.env.VITE_SELF_URL || '/api/v1/users/session/self/';
-import type { Message, Paginated, RawRoom, Room, RoomMember, User, UserSearchResult } from './types';
+import type { BlockState, Message, Paginated, RawRoom, Room, RoomMember, User, UserCard, UserSearchResult } from './types';
 
 /** next из DRF — абсолютный URL; превращаем в путь, чтобы работал и через dev-прокси. */
 function toPath(url: string) {
@@ -33,6 +33,32 @@ export const authApi = {
   /** Текущий пользователь сайта — живёт вне /api/v1/chat/. */
   async me() {
     const { data } = await http.get<User>(USERS_SELF, { baseURL: '' });
+    return data;
+  },
+};
+
+const USERS_BASE = import.meta.env.VITE_USERS_BASE || '/api/v1/users';
+
+/** Ручки пользователей сайта — живут вне /api/v1/chat/. */
+export const usersApi = {
+  /** Кого заблокировал текущий пользователь, постранично по offset. */
+  async blacklist(offset: number, limit = 30) {
+    const { data } = await http.get<{ objects: UserCard[]; more: boolean; offset: number }>(
+      `${USERS_BASE}/session/blacklist/`,
+      { baseURL: '', params: { offset, limit } },
+    );
+    return data;
+  },
+  async blockState(userId: number) {
+    const { data } = await http.get<BlockState>(`${USERS_BASE}/session/blacklist/${userId}/`, { baseURL: '' });
+    return data;
+  },
+  async block(userId: number) {
+    const { data } = await http.put<BlockState>(`${USERS_BASE}/session/blacklist/${userId}/`, null, { baseURL: '' });
+    return data;
+  },
+  async unblock(userId: number) {
+    const { data } = await http.delete<BlockState>(`${USERS_BASE}/session/blacklist/${userId}/`, { baseURL: '' });
     return data;
   },
 };

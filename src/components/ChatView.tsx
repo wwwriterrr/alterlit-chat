@@ -4,6 +4,9 @@ import { useAppSelector } from '../store/hooks';
 import { Navigate, useParams } from 'react-router';
 import { useRoomSocket } from '../hooks/useRoomSocket';
 import { addAttachments, type Attachment } from '../utils/files';
+import { useBlockState } from '../hooks/useBlockState';
+import { useRoomPeer } from '../hooks/useRoomPeer';
+import BlockedBar from './BlockedBar';
 import ChatHeader from './ChatHeader';
 import Composer from './Composer';
 import Lightbox, { type LightboxState } from './Lightbox';
@@ -20,6 +23,9 @@ export default function ChatView() {
 
 function Room({ roomId }: { roomId: number }) {
   const { status, sendTyping } = useRoomSocket(roomId);
+  const { peerId } = useRoomPeer(roomId);
+  const { state: block, busy: blockBusy } = useBlockState(peerId);
+  const cantWrite = peerId !== undefined && block && (block.blocked || block.blockedMe);
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [fileErrors, setFileErrors] = useState<string[]>([]);
   const [dragging, setDragging] = useState(false);
@@ -69,7 +75,8 @@ function Room({ roomId }: { roomId: number }) {
     <div
       className={s.root}
       onDragEnter={(e) => {
-        if (!hasFiles(e)) return;
+        // писать нельзя — и прикреплять некуда
+        if (!hasFiles(e) || cantWrite) return;
         e.preventDefault();
         dragDepth.current += 1;
         setDragging(true);
@@ -81,31 +88,35 @@ function Room({ roomId }: { roomId: number }) {
       }}
       onDrop={(e) => {
         if (!hasFiles(e)) return;
-        e.preventDefault();
+        e.preventDefault(); // иначе браузер откроет файл вместо чата
         dragDepth.current = 0;
         setDragging(false);
-        addFiles(Array.from(e.dataTransfer.files));
+        if (!cantWrite) addFiles(Array.from(e.dataTransfer.files));
       }}
     >
       <ChatHeader roomId={roomId} socketStatus={status} />
       <MessageList roomId={roomId} onOpenImage={setLightbox} scrollToBottomRef={scrollToBottomRef} onEdit={startEdit} />
-      <Composer
-        roomId={roomId}
-        attachments={attachments}
-        fileErrors={fileErrors}
-        onAddFiles={addFiles}
-        onRemoveAttachment={removeAttachment}
-        onDismissErrors={() => setFileErrors([])}
-        onSent={() => {
-          setAttachments([]);
-          setFileErrors([]);
-          scrollToBottomRef.current();
-        }}
-        sendTyping={sendTyping}
-        editing={editing}
-        onEditStart={startEdit}
-        onEditEnd={endEdit}
-      />
+      {cantWrite ? (
+        <BlockedBar peerId={peerId} block={block} busy={blockBusy} />
+      ) : (
+        <Composer
+          roomId={roomId}
+          attachments={attachments}
+          fileErrors={fileErrors}
+          onAddFiles={addFiles}
+          onRemoveAttachment={removeAttachment}
+          onDismissErrors={() => setFileErrors([])}
+          onSent={() => {
+            setAttachments([]);
+            setFileErrors([]);
+            scrollToBottomRef.current();
+          }}
+          sendTyping={sendTyping}
+          editing={editing}
+          onEditStart={startEdit}
+          onEditEnd={endEdit}
+        />
+      )}
       {dragging && (
         <div className={s.drop} aria-hidden>
           <div className={s.dropInner}>

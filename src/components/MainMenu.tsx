@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { setAppearanceOpen } from '../store/uiSlice';
+import { openPanel } from '../store/uiSlice';
 import { logoutUrl } from '../utils/people';
 import Avatar from './Avatar';
-import { IconLogout, IconMenu, IconPalette } from './Icons';
+import { IconBlock, IconLogout, IconMenu, IconPalette } from './Icons';
 import s from './MainMenu.module.css';
 
 export default function MainMenu() {
@@ -45,11 +45,22 @@ export default function MainMenu() {
             className={s.item}
             onClick={() => {
               setOpen(false);
-              dispatch(setAppearanceOpen(true));
+              dispatch(openPanel('appearance'));
             }}
           >
             <IconPalette width={20} height={20} />
             Оформление
+          </button>
+          <button
+            role="menuitem"
+            className={s.item}
+            onClick={() => {
+              setOpen(false);
+              dispatch(openPanel('blacklist'));
+            }}
+          >
+            <IconBlock width={20} height={20} />
+            Заблокированные
           </button>
           <a role="menuitem" className={`${s.item} ${s.danger}`} href={logoutUrl()}>
             <IconLogout width={20} height={20} />

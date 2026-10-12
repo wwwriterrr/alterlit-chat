@@ -1,5 +1,5 @@
 import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { setNewChatOpen } from '../store/uiSlice';
+import { openPanel } from '../store/uiSlice';
 import { IconEdit, IconQuill } from './Icons';
 import s from './EmptyChat.module.css';
 
@@ -10,7 +10,7 @@ export default function EmptyChat() {
   return (
     <div className={s.root}>
       {noRooms ? (
-        <button className={s.chip} onClick={() => dispatch(setNewChatOpen(true))}>
+        <button className={s.chip} onClick={() => dispatch(openPanel('newChat'))}>
           <IconEdit width={18} height={18} />
           Найдите собеседника, чтобы начать переписку
         </button>

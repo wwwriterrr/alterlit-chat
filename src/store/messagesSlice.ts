@@ -1,10 +1,12 @@
 import { createAsyncThunk, createSlice, type PayloadAction } from '@reduxjs/toolkit';
+import axios from 'axios';
 import { chatApi } from '../api/chatApi';
 import { errorText } from '../api/http';
 import type { FileCategory, Message } from '../api/types';
 import { dateMs } from '../utils/date';
 import type { Attachment } from '../utils/files';
 import type { AppDispatch, RootState } from './index';
+import { refreshRoomBlock } from './blacklistSlice';
 import { messageArrived, roomPreview } from './roomsSlice';
 import { showToast } from './uiSlice';
 import { learnNames } from './usersSlice';
@@ -203,6 +205,8 @@ async function deliver(dispatch: AppDispatch, roomId: number, localId: string, c
   } catch (e) {
     if (box.abort.signal.aborted) return;
     dispatch(pendingFailed({ roomId, localId, error: errorText(e, 'Не отправлено') }));
+    // 403 — скорее всего, кто-то из двоих заблокировал другого: обновляем плашку вместо поля ввода
+    if (axios.isAxiosError(e) && e.response?.status === 403) dispatch(refreshRoomBlock(roomId));
   }
 }
 
