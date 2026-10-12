@@ -9,6 +9,7 @@ import Avatar from './Avatar';
 import { IconBlock, IconCheck } from './Icons';
 import PersonName from './PersonName';
 import s from './RoomItem.module.css';
+import { routes } from '../utils/routes';
 
 const LONG_PRESS_MS = 450;
 
@@ -93,7 +94,7 @@ function RoomItem({ room, active, onMenu, selecting = false, checked = false, on
 
   return (
     <Link
-      to={`/room/${room.id}`}
+      to={routes.room(room.id)}
       className={s.item}
       data-active={active || undefined}
       aria-current={active ? 'page' : undefined}

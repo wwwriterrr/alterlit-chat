@@ -17,6 +17,7 @@ import {
 import { learnNames } from '../store/usersSlice';
 import { verifySession } from '../store/authSlice';
 import type { SocketStatus } from './useRoomSocket';
+import { routes } from '../utils/routes';
 
 /**
  * Личный поток ws/chat/stream/: события из всех чатов пользователя.
@@ -102,7 +103,7 @@ export function useChatStream() {
           break;
         case 'room_deleted':
           dispatch(roomRemoved(event.room_id));
-          if (openRoomRef.current === event.room_id) navigateRef.current('/', { replace: true });
+          if (openRoomRef.current === event.room_id) navigateRef.current(routes.home, { replace: true });
           break;
         case 'room_restored':
           refetchRooms();

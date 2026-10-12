@@ -12,6 +12,7 @@ import PersonName from './PersonName';
 import { IconBack, IconBlock, IconMore, IconTrash, IconUser } from './Icons';
 import { ConfirmDialog, MessageMenu } from './MessageMenu';
 import s from './ChatHeader.module.css';
+import { routes } from '../utils/routes';
 
 export default function ChatHeader({ roomId, socketStatus }: { roomId: number; socketStatus: SocketStatus }) {
   const { room, peerId } = useRoomPeer(roomId);
@@ -28,7 +29,7 @@ export default function ChatHeader({ roomId, socketStatus }: { roomId: number; s
 
   return (
     <header className={s.header}>
-      <Link to="/" className={s.back} aria-label="К списку диалогов">
+      <Link to={routes.home} className={s.back} aria-label="К списку диалогов">
         <IconBack />
       </Link>
       <PeerLink username={username} label={known ? `Открыть профиль «${name}» в новой вкладке` : undefined}>

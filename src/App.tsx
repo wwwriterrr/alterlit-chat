@@ -11,6 +11,7 @@ import { useAppDispatch, useAppSelector } from './store/hooks';
 import { useMediaQuery } from './hooks/useMediaQuery';
 import { applyAppearance } from './utils/appearance';
 import { installWallpaperAssets } from './utils/wallpaper';
+import { routes } from './utils/routes';
 
 export default function App() {
   const dispatch = useAppDispatch();
@@ -42,7 +43,7 @@ export default function App() {
         <Route index element={<EmptyChat />} />
         <Route path="room/:roomId" element={<ChatView />} />
         <Route path="dialog/:peerId" element={<DialogOpener />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="*" element={<Navigate to={routes.home} replace />} />
       </Route>
     </Routes>
   );

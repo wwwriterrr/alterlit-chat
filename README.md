@@ -29,7 +29,8 @@ npm run build                # → dist/
 (все вложенные пути `/messenger/...` отдают один шаблон; `ensure_csrf_cookie` ставит `csrftoken`).
 Чат открывается по адресу `https://alterlit.ru/messenger/` — это задано атрибутом `data-base="/messenger/"` у `#root`.
 
-Маршруты SPA (от `/messenger/`): `/` — список, `/room/<id>` — диалог, `/dialog/<peer_id>` — открыть
+Маршруты SPA (от `/messenger/`, все со слешем на конце; собираются в `src/utils/routes.ts`): `/` — список,
+`/room/<id>/` — диалог, `/dialog/<peer_id>/` — открыть
 или создать диалог с пользователем (ссылка для кнопки «Написать» в профиле).
 
 ## Форматирование текста

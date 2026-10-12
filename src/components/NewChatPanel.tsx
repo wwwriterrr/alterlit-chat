@@ -9,6 +9,7 @@ import Avatar from './Avatar';
 import PersonName from './PersonName';
 import { IconBack, IconClose, IconSearch } from './Icons';
 import s from './NewChatPanel.module.css';
+import { routes } from '../utils/routes';
 
 /** Панель «Новый чат»: поиск собеседника на месте списка диалогов. */
 export default function NewChatPanel({ onClose }: { onClose: () => void }) {
@@ -45,7 +46,7 @@ export default function NewChatPanel({ onClose }: { onClose: () => void }) {
     setOpening(null);
     if (roomId !== null) {
       onClose();
-      navigate(`/room/${roomId}`);
+      navigate(routes.room(roomId));
     }
   };
 

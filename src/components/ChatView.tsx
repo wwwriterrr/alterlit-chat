@@ -12,11 +12,12 @@ import Composer from './Composer';
 import Lightbox, { type LightboxState } from './Lightbox';
 import MessageList from './MessageList';
 import s from './ChatView.module.css';
+import { routes } from '../utils/routes';
 
 export default function ChatView() {
   const { roomId: param } = useParams();
   const roomId = Number(param);
-  if (!Number.isInteger(roomId) || roomId <= 0) return <Navigate to="/" replace />;
+  if (!Number.isInteger(roomId) || roomId <= 0) return <Navigate to={routes.home} replace />;
   // key сбрасывает состояние (вложения, прокрутку) при переходе в другой диалог
   return <Room key={roomId} roomId={roomId} />;
 }

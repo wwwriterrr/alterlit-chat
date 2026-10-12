@@ -5,6 +5,7 @@ import { askDeleteRooms, stopSelecting } from '../store/uiSlice';
 import { peerIdOf } from '../utils/people';
 import { CHATS, plural } from '../utils/plural';
 import { ConfirmDialog } from './MessageMenu';
+import { routes } from '../utils/routes';
 
 /** Подтверждение «Удалить чат?» / «Удалить N чатов?» — для меню списка, шапки чата и режима выбора. */
 export default function DeleteRoomConfirm() {
@@ -37,7 +38,7 @@ export default function DeleteRoomConfirm() {
       onConfirm={() => {
         cancel();
         dispatch(stopSelecting());
-        if (rooms.some((r) => r.id === openRoomId)) navigate('/', { replace: true });
+        if (rooms.some((r) => r.id === openRoomId)) navigate(routes.home, { replace: true });
         dispatch(deleteRooms(rooms.map((r) => r.id)));
       }}
     />
