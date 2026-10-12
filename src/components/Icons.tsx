@@ -80,6 +80,9 @@ export const IconCopy = (p: P) => (
 export const IconCheck = (p: P) => (
   <svg {...base} {...p}><path d="m5 12.5 4.5 4.5L19 7.5" /></svg>
 );
+export const IconSelect = (p: P) => (
+  <svg {...base} {...p}><circle cx="12" cy="12" r="8.5" /><path d="m8.5 12.2 2.4 2.4 4.6-4.8" /></svg>
+);
 export const IconMore = (p: P) => (
   <svg {...base} {...p}><circle cx="12" cy="5.5" r="1.4" fill="currentColor" stroke="none" /><circle cx="12" cy="12" r="1.4" fill="currentColor" stroke="none" /><circle cx="12" cy="18.5" r="1.4" fill="currentColor" stroke="none" /></svg>
 );

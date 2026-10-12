@@ -181,3 +181,38 @@
 .cta:hover {
   background: var(--primary-hover);
 }
+
+/* ── режим выбора ── */
+.iconBtn {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  color: var(--text-2);
+}
+.iconBtn:hover {
+  background: var(--surface-2);
+}
+.deleteSelected {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 14px 0 10px;
+  border-radius: 18px;
+  font-family: var(--sans);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--danger);
+  transition: background 0.12s;
+}
+.deleteSelected:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--danger) 12%, transparent);
+}
+.deleteSelected:disabled {
+  opacity: 0.45;
+  cursor: default;
+}

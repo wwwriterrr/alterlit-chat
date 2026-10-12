@@ -3,11 +3,19 @@ import type { Room } from '../api/types';
 import { useMatch } from 'react-router';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { fetchMoreRooms, fetchRooms, markRoomRead } from '../store/roomsSlice';
-import { askDeleteRoom, setAppearanceOpen, setNewChatOpen } from '../store/uiSlice';
+import {
+  askDeleteRooms,
+  setAppearanceOpen,
+  setNewChatOpen,
+  startSelecting,
+  stopSelecting,
+  toggleSelected,
+} from '../store/uiSlice';
 import { displayName } from '../store/usersSlice';
 import { plainText } from '../utils/html';
 import { peerIdOf } from '../utils/people';
-import { IconCheck, IconClose, IconEdit, IconSearch, IconTrash } from './Icons';
+import { CHATS, plural } from '../utils/plural';
+import { IconCheck, IconClose, IconEdit, IconSearch, IconSelect, IconTrash } from './Icons';
 import AppearancePanel from './AppearancePanel';
 import NewChatPanel from './NewChatPanel';
 import { MessageMenu, type MenuItem } from './MessageMenu';
@@ -33,12 +41,28 @@ export default function Sidebar() {
   const noRooms = status === 'ready' && list.length === 0;
   const openMenu = useCallback((room: Room, x: number, y: number) => setMenu({ room, x, y }), []);
   const closeMenu = useCallback(() => setMenu(null), []);
+  const selectedRooms = useAppSelector((st) => st.ui.selectedRooms);
+  const selecting = selectedRooms !== null;
+  const toggle = useCallback((room: Room) => dispatch(toggleSelected(room.id)), [dispatch]);
+  // отмеченные, которые ещё в списке (чат мог быть удалён в другой вкладке)
+  const selected = useMemo(
+    () => (selectedRooms ?? []).filter((id) => list.some((r) => r.id === id)),
+    [selectedRooms, list],
+  );
+
+  useEffect(() => {
+    if (!selecting) return;
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && dispatch(stopSelecting());
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [selecting, dispatch]);
 
   const menuItems = (room: Room): MenuItem[] => [
+    { key: 'select', label: 'Выбрать', icon: <IconSelect />, onSelect: () => dispatch(startSelecting(room.id)) },
     ...(room.unread_count > 0
       ? [{ key: 'read', label: 'Отметить прочитанным', icon: <IconCheck />, onSelect: () => dispatch(markRoomRead(room.id)) }]
       : []),
-    { key: 'delete', label: 'Удалить чат', icon: <IconTrash />, danger: true, onSelect: () => dispatch(askDeleteRoom(room.id)) },
+    { key: 'delete', label: 'Удалить чат', icon: <IconTrash />, danger: true, onSelect: () => dispatch(askDeleteRooms([room.id])) },
   ];
 
   const filtered = useMemo(() => {
@@ -69,29 +93,49 @@ export default function Sidebar() {
 
   return (
     <>
-      <header className={s.header}>
-        <MainMenu />
-        {noRooms ? (
-          <h1 className={s.heading}>Сообщения</h1>
-        ) : (
-        <label className={s.search}>
-          <IconSearch className={s.searchIcon} width={18} height={18} />
-          <span className="visually-hidden">Поиск по диалогам</span>
-          <input
-            type="search"
-            placeholder="Поиск"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            onKeyDown={(e) => e.key === 'Escape' && setQuery('')}
-          />
-          {query && (
-            <button type="button" className={s.clear} onClick={() => setQuery('')} aria-label="Очистить поиск">
-              <IconClose width={16} height={16} />
-            </button>
+      {selecting ? (
+        <header className={s.header}>
+          <button className={s.iconBtn} onClick={() => dispatch(stopSelecting())} aria-label="Отменить выбор">
+            <IconClose />
+          </button>
+          <h1 className={s.heading} aria-live="polite">
+            Выбрано: {selected.length}
+          </h1>
+          <button
+            className={s.deleteSelected}
+            onClick={() => dispatch(askDeleteRooms(selected))}
+            disabled={!selected.length}
+            aria-label={`Удалить ${selected.length} ${plural(selected.length, CHATS)}`}
+          >
+            <IconTrash width={20} height={20} />
+            Удалить
+          </button>
+        </header>
+      ) : (
+        <header className={s.header}>
+          <MainMenu />
+          {noRooms ? (
+            <h1 className={s.heading}>Сообщения</h1>
+          ) : (
+            <label className={s.search}>
+              <IconSearch className={s.searchIcon} width={18} height={18} />
+              <span className="visually-hidden">Поиск по диалогам</span>
+              <input
+                type="search"
+                placeholder="Поиск"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                onKeyDown={(e) => e.key === 'Escape' && setQuery('')}
+              />
+              {query && (
+                <button type="button" className={s.clear} onClick={() => setQuery('')} aria-label="Очистить поиск">
+                  <IconClose width={16} height={16} />
+                </button>
+              )}
+            </label>
           )}
-        </label>
-        )}
-      </header>
+        </header>
+      )}
 
       <nav className={s.list} aria-label="Диалоги" ref={navRef}>
         {status === 'loading' && <RoomSkeleton />}
@@ -124,7 +168,14 @@ export default function Sidebar() {
         <ul className={s.ul}>
           {filtered.map((room) => (
             <li key={room.id}>
-              <RoomItem room={room} active={String(room.id) === roomId} onMenu={openMenu} />
+              <RoomItem
+                room={room}
+                active={!selecting && String(room.id) === roomId}
+                onMenu={openMenu}
+                selecting={selecting}
+                checked={selected.includes(room.id)}
+                onToggle={toggle}
+              />
             </li>
           ))}
         </ul>
@@ -136,9 +187,11 @@ export default function Sidebar() {
           </p>
         )}
       </nav>
-      <button className={s.fab} onClick={() => setNewChat(true)} aria-label="Новый чат" title="Новый чат">
-        <IconEdit />
-      </button>
+      {!selecting && (
+        <button className={s.fab} onClick={() => setNewChat(true)} aria-label="Новый чат" title="Новый чат">
+          <IconEdit />
+        </button>
+      )}
       {menu && <MessageMenu x={menu.x} y={menu.y} items={menuItems(menu.room)} onClose={closeMenu} />}
     </>
   );

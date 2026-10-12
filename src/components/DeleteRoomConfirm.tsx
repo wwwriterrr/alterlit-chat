@@ -1,34 +1,44 @@
 import { useMatch, useNavigate } from 'react-router';
 import { useAppDispatch, useAppSelector, usePeer } from '../store/hooks';
-import { deleteRoom } from '../store/roomsSlice';
-import { askDeleteRoom } from '../store/uiSlice';
+import { deleteRooms } from '../store/roomsSlice';
+import { askDeleteRooms, stopSelecting } from '../store/uiSlice';
 import { peerIdOf } from '../utils/people';
+import { CHATS, plural } from '../utils/plural';
 import { ConfirmDialog } from './MessageMenu';
 
-/** Подтверждение «Удалить чат?» — общее для списка диалогов и шапки чата. */
+/** Подтверждение «Удалить чат?» / «Удалить N чатов?» — для меню списка, шапки чата и режима выбора. */
 export default function DeleteRoomConfirm() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const roomId = useAppSelector((st) => st.ui.confirmDeleteRoom);
+  const ids = useAppSelector((st) => st.ui.confirmDeleteRooms);
   const meId = useAppSelector((st) => st.auth.user?.id);
-  const room = useAppSelector((st) => st.rooms.list.find((r) => r.id === roomId));
-  const { name } = usePeer(room ? peerIdOf(room.members, meId) : undefined);
-  const openRoomId = useMatch('/room/:roomId')?.params.roomId;
+  const list = useAppSelector((st) => st.rooms.list);
+  // чаты могли пропасть, пока открыт диалог (удалены в другой вкладке)
+  const rooms = ids ? list.filter((r) => ids.includes(r.id)) : [];
+  const single = rooms.length === 1 ? rooms[0] : undefined;
+  const { name } = usePeer(single ? peerIdOf(single.members, meId) : undefined);
+  const openRoomId = Number(useMatch('/room/:roomId')?.params.roomId);
 
-  if (roomId === null || !room) return null;
+  if (!rooms.length) return null;
 
-  const cancel = () => dispatch(askDeleteRoom(null));
+  const cancel = () => dispatch(askDeleteRooms(null));
+  const n = rooms.length;
 
   return (
     <ConfirmDialog
-      title={`Удалить чат «${name}»?`}
-      text="Чат пропадёт только у вас, непрочитанные сообщения станут прочитанными. Если собеседник напишет снова, чат вернётся со всей историей."
-      confirmLabel="Удалить чат"
+      title={single ? `Удалить чат «${name}»?` : `Удалить ${n} ${plural(n, CHATS)}?`}
+      text={
+        single
+          ? 'Чат пропадёт только у вас, непрочитанные сообщения станут прочитанными. Если собеседник напишет снова, чат вернётся со всей историей.'
+          : 'Чаты пропадут только у вас, непрочитанные сообщения станут прочитанными. Если собеседник напишет снова, его чат вернётся со всей историей.'
+      }
+      confirmLabel={single ? 'Удалить чат' : `Удалить ${n} ${plural(n, CHATS)}`}
       onCancel={cancel}
       onConfirm={() => {
         cancel();
-        if (openRoomId === String(roomId)) navigate('/', { replace: true });
-        dispatch(deleteRoom(roomId));
+        dispatch(stopSelecting());
+        if (rooms.some((r) => r.id === openRoomId)) navigate('/', { replace: true });
+        dispatch(deleteRooms(rooms.map((r) => r.id)));
       }}
     />
   );

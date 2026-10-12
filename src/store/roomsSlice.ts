@@ -3,7 +3,9 @@ import { chatApi } from '../api/chatApi';
 import { errorText } from '../api/http';
 import type { Message, Room, UserSearchResult } from '../api/types';
 import { dateMs } from '../utils/date';
+import { settleAll } from '../utils/async';
 import { attachmentSummary } from '../utils/files';
+import { CHATS, plural } from '../utils/plural';
 import type { AppDispatch, RootState } from './index';
 import { showToast } from './uiSlice';
 import { displayName, learnNames, learnProfiles } from './usersSlice';
@@ -230,27 +232,66 @@ const roomsSlice = createSlice({
 export const { messageArrived, roomPreview, roomHidden, roomRemoved, roomLastEdited, roomHideSettled, roomRead, typing, expireTyping, peerRead } = roomsSlice.actions;
 export default roomsSlice.reducer;
 
+/** Сколько DELETE /rooms/<id>/ уходит одновременно при групповом удалении. */
+const DELETE_CONCURRENCY = 4;
+
 /**
- * Удаление чата у себя. Чат пропадает из списка сразу; если сервер откажет —
- * возвращается на место. После успеха — уведомление с кнопкой «Вернуть».
+ * Удаление чатов у себя (одного или выбранных). Чаты пропадают из списка сразу;
+ * те, что сервер не удалил, возвращаются на место. После успеха — уведомление
+ * с кнопкой «Вернуть». Ошибка одного чата не отменяет остальные.
  */
-export function deleteRoom(roomId: number) {
+export function deleteRooms(roomIds: number[]) {
   return async (dispatch: AppDispatch, getState: () => RootState) => {
-    const room = getState().rooms.list.find((r) => r.id === roomId);
-    if (!room) return;
+    const { list } = getState().rooms;
+    const rooms = roomIds.map((id) => list.find((r) => r.id === id)).filter((r): r is Room => r !== undefined);
+    if (!rooms.length) return;
     const meId = getState().auth.user?.id;
-    const peerId = room.members.find((m) => m !== meId);
-    dispatch(roomHidden(roomId));
-    try {
-      await chatApi.deleteRoom(roomId);
-      dispatch(roomHideSettled({ roomId }));
-      dispatch(
-        showToast('Чат удалён', peerId !== undefined ? { label: 'Вернуть', kind: 'restoreRoom', peerId } : undefined),
-      );
-    } catch (e) {
-      dispatch(roomHideSettled({ roomId, restore: room }));
-      dispatch(showToast(errorText(e, 'Не удалось удалить чат. Попробуйте ещё раз.')));
+    rooms.forEach((r) => dispatch(roomHidden(r.id)));
+
+    const results = await settleAll(rooms, DELETE_CONCURRENCY, (r) => chatApi.deleteRoom(r.id));
+
+    const peerIds: number[] = [];
+    let failed = 0;
+    let error: unknown;
+    results.forEach((res, i) => {
+      const room = rooms[i];
+      if (res.status === 'fulfilled') {
+        dispatch(roomHideSettled({ roomId: room.id }));
+        const peerId = room.members.find((m) => m !== meId);
+        if (peerId !== undefined) peerIds.push(peerId);
+      } else {
+        dispatch(roomHideSettled({ roomId: room.id, restore: room }));
+        failed += 1;
+        error ??= res.reason;
+      }
+    });
+
+    const done = rooms.length - failed;
+    const restore = peerIds.length ? ({ label: 'Вернуть', kind: 'restoreRooms', peerIds } as const) : undefined;
+    if (failed === 0) {
+      dispatch(showToast(done === 1 ? 'Чат удалён' : `Удалено ${done} ${plural(done, CHATS)}`, restore));
+    } else if (done === 0) {
+      const fallback = rooms.length === 1 ? 'Не удалось удалить чат.' : 'Не удалось удалить чаты.';
+      dispatch(showToast(`${errorText(error, fallback)} Попробуйте ещё раз.`));
+    } else {
+      dispatch(showToast(`Удалено ${done} из ${rooms.length}, остальные не удалось — попробуйте ещё раз`, restore));
     }
+  };
+}
+
+/** «Вернуть» после удаления: get_or_create_dialog убирает чаты из удалённых. -> id первого вернувшегося. */
+export function restoreRooms(peerIds: number[]) {
+  return async (dispatch: AppDispatch) => {
+    const results = await settleAll(peerIds, DELETE_CONCURRENCY, async (peerId) => {
+      const res = await dispatch(openDialog(peerId));
+      if (!openDialog.fulfilled.match(res)) throw new Error(String(res.payload ?? 'restore failed'));
+      return res.payload.id;
+    });
+    const restored = results.filter((r) => r.status === 'fulfilled');
+    if (restored.length < results.length) {
+      dispatch(showToast(restored.length ? 'Вернулись не все чаты — попробуйте ещё раз' : 'Не удалось вернуть чат'));
+    }
+    return restored[0]?.value ?? null;
   };
 }
 

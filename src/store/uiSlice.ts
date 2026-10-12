@@ -8,7 +8,7 @@ const KEY = 'alterlit-chat-theme';
 const WP_KEY = 'alterlit-chat-wallpaper';
 
 /** Действие в уведомлении — сериализуемое описание, выполняет компонент Toast. */
-export type ToastAction = { label: string; kind: 'restoreRoom'; peerId: number };
+export type ToastAction = { label: string; kind: 'restoreRooms'; peerIds: number[] };
 export interface Toast {
   id: number;
   text: string;
@@ -40,8 +40,10 @@ const uiSlice = createSlice({
     appearance: loadAppearance(),
     wallpaper: loadWallpaper(),
     toast: null as Toast | null,
-    /** id чата, для которого открыт диалог «Удалить чат?» */
-    confirmDeleteRoom: null as number | null,
+    /** id чатов, для которых открыт диалог «Удалить чат(ы)?» */
+    confirmDeleteRooms: null as number[] | null,
+    /** режим выбора в списке диалогов: id отмеченных; null — обычный список */
+    selectedRooms: null as number[] | null,
     /** панель «Новый чат» вместо списка диалогов */
     newChatOpen: false,
     /** панель «Оформление» вместо списка диалогов */
@@ -58,18 +60,37 @@ const uiSlice = createSlice({
     },
     setNewChatOpen(state, action: PayloadAction<boolean>) {
       state.newChatOpen = action.payload;
-      if (action.payload) state.appearanceOpen = false;
+      if (action.payload) {
+        state.appearanceOpen = false;
+        state.selectedRooms = null;
+      }
     },
     setAppearanceOpen(state, action: PayloadAction<boolean>) {
       state.appearanceOpen = action.payload;
-      if (action.payload) state.newChatOpen = false;
+      if (action.payload) {
+        state.newChatOpen = false;
+        state.selectedRooms = null;
+      }
     },
     setAppearance(state, action: PayloadAction<Partial<Appearance>>) {
       state.appearance = { ...state.appearance, ...action.payload };
       saveAppearance(state.appearance);
     },
-    askDeleteRoom(state, action: PayloadAction<number | null>) {
-      state.confirmDeleteRoom = action.payload;
+    askDeleteRooms(state, action: PayloadAction<number[] | null>) {
+      state.confirmDeleteRooms = action.payload?.length ? action.payload : null;
+    },
+    /** «Выбрать» в меню чата: включает режим выбора с этим чатом. */
+    startSelecting(state, action: PayloadAction<number>) {
+      state.selectedRooms = [action.payload];
+    },
+    /** Отметить/снять чат; сняли последний — режим выбора выключается. */
+    toggleSelected(state, action: PayloadAction<number>) {
+      const list = state.selectedRooms ?? [];
+      const next = list.includes(action.payload) ? list.filter((id) => id !== action.payload) : [...list, action.payload];
+      state.selectedRooms = next.length ? next : null;
+    },
+    stopSelecting(state) {
+      state.selectedRooms = null;
     },
     hideToast(state, action: PayloadAction<number>) {
       if (state.toast?.id === action.payload) state.toast = null;
@@ -101,7 +122,10 @@ export const {
   setWallpaper,
   showToast,
   hideToast,
-  askDeleteRoom,
+  askDeleteRooms,
+  startSelecting,
+  toggleSelected,
+  stopSelecting,
   setNewChatOpen,
 } = uiSlice.actions;
 export default uiSlice.reducer;

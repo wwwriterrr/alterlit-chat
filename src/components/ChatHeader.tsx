@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router';
 import type { SocketStatus } from '../hooks/useRoomSocket';
 import { useAppDispatch, useAppSelector, usePeer } from '../store/hooks';
-import { askDeleteRoom } from '../store/uiSlice';
+import { askDeleteRooms } from '../store/uiSlice';
 import { peerIdOf, profileUrl } from '../utils/people';
 import Avatar from './Avatar';
 import PersonName from './PersonName';
@@ -77,7 +77,7 @@ export default function ChatHeader({ roomId, socketStatus }: { roomId: number; s
               label: 'Удалить чат',
               icon: <IconTrash />,
               danger: true,
-              onSelect: () => dispatch(askDeleteRoom(roomId)),
+              onSelect: () => dispatch(askDeleteRooms([roomId])),
             },
           ]}
         />

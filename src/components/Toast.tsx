@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { openDialog } from '../store/roomsSlice';
+import { restoreRooms } from '../store/roomsSlice';
 import { hideToast, type ToastAction } from '../store/uiSlice';
 import s from './Toast.module.css';
 
@@ -19,10 +19,10 @@ export default function Toast() {
 
   const run = (action: ToastAction, id: number) => {
     dispatch(hideToast(id));
-    if (action.kind === 'restoreRoom') {
-      // get_or_create_dialog убирает чат из удалённых и отдаёт его целиком
-      dispatch(openDialog(action.peerId)).then((res) => {
-        if (openDialog.fulfilled.match(res)) navigate(`/room/${res.payload.id}`);
+    if (action.kind === 'restoreRooms') {
+      // один чат — сразу открываем его; несколько — просто возвращаем в список
+      dispatch(restoreRooms(action.peerIds)).then((roomId) => {
+        if (roomId !== null && action.peerIds.length === 1) navigate(`/room/${roomId}`);
       });
     }
   };
