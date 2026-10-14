@@ -27,6 +27,13 @@ interface RoomsState {
 
 export const ROOMS_PAGE = 30;
 
+/** Граница «прочитано собеседником» из REST — только вперёд: живое read_message могло уже уйти дальше. */
+function learnPeerRead(s: RoomsState, rooms: Room[]) {
+  for (const r of rooms) {
+    if (r.peer_read_up_to) s.peerReadUpTo[r.id] = Math.max(s.peerReadUpTo[r.id] ?? 0, r.peer_read_up_to);
+  }
+}
+
 const initialState: RoomsState = {
   list: [],
   status: 'idle',
@@ -202,6 +209,7 @@ const roomsSlice = createSlice({
     });
     b.addCase(fetchRooms.fulfilled, (s, a) => {
       s.list = a.payload.items.filter((r) => !s.hiding.includes(r.id));
+      learnPeerRead(s, a.payload.items);
       s.hasMore = a.payload.more;
       sortRooms(s.list);
       s.status = 'ready';
@@ -218,6 +226,7 @@ const roomsSlice = createSlice({
       // страницы могли сдвинуться (чат поднялся наверх) — повторы отбрасываем по id
       const known = new Set(s.list.map((r) => r.id));
       s.list.push(...a.payload.items.filter((r) => !known.has(r.id) && !s.hiding.includes(r.id)));
+      learnPeerRead(s, a.payload.items);
       s.hasMore = a.payload.more;
       s.loadingMore = false;
       sortRooms(s.list);
@@ -225,7 +234,10 @@ const roomsSlice = createSlice({
     b.addCase(fetchMoreRooms.rejected, (s) => {
       s.loadingMore = false;
     });
-    b.addCase(openDialog.fulfilled, (s, a) => upsertRoom(s, a.payload));
+    b.addCase(openDialog.fulfilled, (s, a) => {
+      upsertRoom(s, a.payload);
+      learnPeerRead(s, [a.payload]);
+    });
   },
 });
 

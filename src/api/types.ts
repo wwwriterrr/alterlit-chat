@@ -82,6 +82,8 @@ export interface Room {
   last_message_content: string | null;
   last_message_date: string | null;
   unread_count: number;
+  /** id моего последнего сообщения, прочитанного собеседником (две галочки до него); null — ни одного */
+  peer_read_up_to?: number | null;
 }
 
 export interface Paginated<T> {

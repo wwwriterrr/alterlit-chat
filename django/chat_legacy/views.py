@@ -1,6 +1,6 @@
 from django.contrib.auth.models import Group, User
 from django.db import transaction
-from django.db.models import Case, Count, IntegerField, OuterRef, Prefetch, Q, Subquery, Value, When
+from django.db.models import Case, Count, Exists, IntegerField, OuterRef, Prefetch, Q, Subquery, Value, When
 from django.db.models.functions import Coalesce
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
@@ -59,11 +59,23 @@ def rooms_for(user):
     # строит корректный NOT IN, поэтому считаем подзапросом.
     unread = (Message.objects
               .filter(room=OuterRef('pk'))
+              .exclude(sender=user)  # как в legacy: отправителя в is_read нет, своё не считаем
               .exclude(is_read=user)
               .order_by()
               .values('room')
               .annotate(c=Count('pk'))
               .values('c'))
+
+    # моё последнее сообщение, которое прочитал кто-то, кроме меня (вторая галочка);
+    # «кроме меня» — новый мессенджер какое-то время добавлял автора в is_read
+    read_by_peer = (Message.is_read.through.objects
+                    .filter(message_id=OuterRef('pk'))
+                    .exclude(user_id=user.id))
+    peer_read = (Message.objects
+                 .filter(room=OuterRef('pk'), sender=user)
+                 .filter(Exists(read_by_peer))
+                 .order_by('-id')
+                 .values('id')[:1])
 
     return (Room.objects
             .filter(members=user)
@@ -74,13 +86,16 @@ def rooms_for(user):
                 unread_count=Coalesce(Subquery(unread, output_field=IntegerField()), 0),
                 last_message_date=Subquery(last.values('date')[:1]),
                 last_message_content=Subquery(last.values('content')[:1]),
+                peer_read_up_to=Subquery(peer_read, output_field=IntegerField()),
             )
             .prefetch_related(Prefetch('members', queryset=member_cards())))
 
 
 def mark_room_read(user, room):
     """Отмечает все сообщения комнаты прочитанными пользователем. -> сколько отмечено."""
-    unread = list(room.messages.exclude(is_read=user).values_list('id', flat=True))
+    # свои сообщения не трогаем: по соглашению legacy отправителя в is_read нет
+    unread = list(room.messages.exclude(sender=user).exclude(is_read=user)
+                  .values_list('id', flat=True))
     # bulk через through — вместо цикла INSERT на каждое сообщение;
     # ignore_conflicts — два параллельных запроса (две вкладки) не уронят друг друга
     Message.is_read.through.objects.bulk_create(
@@ -174,7 +189,6 @@ class RoomMessagesList(generics.ListCreateAPIView):
                     type=item['type'],
                 )
                 message.files.add(post_file)
-            message.is_read.add(request.user)  # автор видит своё прочитанным
 
             # перечитываем в «output»-виде с полными files
             message = (Message.objects

@@ -73,6 +73,7 @@ def rooms_for(user):
     # и засчитывает сообщение, если его прочитал кто-то ДРУГОЙ. exclude() по M2M
     # строит корректный NOT IN, поэтому считаем подзапросом.
     unread = (Message.objects.filter(room=OuterRef('pk'))
+              .exclude(sender=user)  # отправителя в is_read нет — своё не считаем
               .exclude(is_read=user)
               .order_by().values('room').annotate(c=Count('pk')).values('c'))
     # Profile очень «широкий» (settings, balance, коды сброса пароля…) —
