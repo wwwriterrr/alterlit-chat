@@ -19,6 +19,9 @@
   /* цвета значка одинаковые во всех палитрах */
   fill: #3b6ef3;
 }
-.badge[data-kind='owner'] {
+.badge[data-kind='chief'] {
   fill: #d50000;
+}
+.badge[data-kind='owner'] {
+  fill: #e9aa44;
 }

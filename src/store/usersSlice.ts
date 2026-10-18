@@ -26,7 +26,14 @@ interface UsersState {
 function load(): UsersState {
   try {
     const saved = JSON.parse(localStorage.getItem(KEY) || '{}');
-    return { usernames: saved.usernames ?? {}, profiles: saved.profiles ?? {} };
+    const profiles: Record<number, PersonProfile> = saved.profiles ?? {};
+    // значки особых пользователей — по id, а не из кэша: раньше у 79691 был сохранён 'owner'
+    for (const p of Object.values(profiles)) {
+      const byId = badgeOf({ id: p.id });
+      if (byId) p.badge = byId;
+      else if (p.badge !== 'staff') p.badge = null;
+    }
+    return { usernames: saved.usernames ?? {}, profiles };
   } catch {
     return { usernames: {}, profiles: {} };
   }
