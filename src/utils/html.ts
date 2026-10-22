@@ -1,5 +1,6 @@
 // Сообщения с сайта приходят HTML-ом из редактора (<p>, <br>, &nbsp;),
 // а из этого клиента — простым текстом. Рендерим оба варианта безопасно.
+import { safeHref } from './richtext';
 
 const ALLOWED = new Set(['P', 'BR', 'B', 'STRONG', 'I', 'EM', 'U', 'INS', 'S', 'STRIKE', 'DEL', 'A', 'UL', 'OL', 'LI', 'BLOCKQUOTE', 'CODE', 'PRE', 'SPAN', 'DIV']);
 const URL_RE = /\bhttps?:\/\/[^\s<>"']+[^\s<>"'.,;:!?)\]]/gi;
@@ -8,15 +9,6 @@ export function looksLikeHtml(s: string) {
   return /<\/?[a-z][\s\S]*?>|&[a-z]+;|&#\d+;/i.test(s);
 }
 
-function safeHref(href: string | null) {
-  if (!href) return null;
-  try {
-    const u = new URL(href, location.href);
-    return u.protocol === 'http:' || u.protocol === 'https:' || u.protocol === 'mailto:' ? u.href : null;
-  } catch {
-    return null;
-  }
-}
 
 function linkifyTextNodes(root: Node, doc: Document) {
   const walker = doc.createTreeWalker(root, NodeFilter.SHOW_TEXT);

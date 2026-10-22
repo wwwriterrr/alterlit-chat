@@ -201,7 +201,8 @@ const RichInput = forwardRef<RichInputHandle, Props>(function RichInput(
 
     if (e.key === 'Enter') {
       e.preventDefault();
-      if (e.shiftKey || coarse) newline();
+      // Shift+Enter (и Alt+Enter — если Shift занят раскладкой) — новая строка; на телефоне Enter — всегда строка
+      if (e.shiftKey || e.altKey || coarse) newline();
       else onSubmit();
       return;
     }

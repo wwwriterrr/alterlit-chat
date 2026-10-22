@@ -18,12 +18,25 @@ const DROP = new Set(['SCRIPT', 'STYLE', 'TEMPLATE', 'IFRAME', 'OBJECT', 'EMBED'
 
 const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
+/** Домен без протокола: example.com, www.ya.ru/path, сайт.рф?q=1 */
+const BARE_DOMAIN = /^(?:www\.)?[\p{L}\d-]+(?:\.[\p{L}\d-]+)+(?::\d+)?(?:[/?#]\S*)?$/u;
+
+/**
+ * Адрес ссылки → полный адрес или null (опасный/непонятный). Без протокола:
+ * похоже на домен — внешний сайт (https://); иначе — путь на сайте от корня, а не от
+ * текущей страницы (/messenger/…): /profile/x/, старые ../../post/1/ из редактора сайта.
+ */
 export function safeHref(raw: string | null): string | null {
   if (!raw) return null;
   const value = raw.trim();
-  const withScheme = /^www\./i.test(value) ? `https://${value}` : value;
+  if (!value || /\s/.test(value)) return null;
+  let candidate = value;
+  if (value.startsWith('//')) candidate = `https:${value}`;
+  else if (!/^[a-z][a-z\d+.-]*:/i.test(value)) {
+    candidate = !value.startsWith('/') && BARE_DOMAIN.test(value) ? `https://${value}` : new URL(value, `${location.origin}/`).href;
+  }
   try {
-    const u = new URL(withScheme);
+    const u = new URL(candidate);
     return ['http:', 'https:', 'mailto:'].includes(u.protocol) ? u.href : null;
   } catch {
     return null;

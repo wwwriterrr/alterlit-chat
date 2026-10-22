@@ -245,6 +245,8 @@ export default function Composer({
               onBlur={() => !editing && stopTyping()}
             />
           </div>
+          {/* на компьютере Enter отправляет — подсказка, как сделать новую строку */}
+          {!coarse && !empty ? <div className={s.hint}>Shift+Enter — новая строка</div> : null}
         </div>
 
         <button
