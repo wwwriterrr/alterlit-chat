@@ -246,7 +246,7 @@ export default function Composer({
             />
           </div>
           {/* на компьютере Enter отправляет — подсказка, как сделать новую строку */}
-          {!coarse && !empty ? <div className={s.hint}>Shift+Enter — новая строка</div> : null}
+          {!coarse && !empty ? <div className={s.hint}>Shift+Enter или Ctrl+Enter — новая строка</div> : null}
         </div>
 
         <button

@@ -201,8 +201,9 @@ const RichInput = forwardRef<RichInputHandle, Props>(function RichInput(
 
     if (e.key === 'Enter') {
       e.preventDefault();
-      // Shift+Enter (и Alt+Enter — если Shift занят раскладкой) — новая строка; на телефоне Enter — всегда строка
-      if (e.shiftKey || e.altKey || coarse) newline();
+      // новая строка: Shift+Enter, Ctrl+Enter (как в Telegram и Max; на Mac — и Cmd+Enter), Alt+Enter;
+      // на телефоне Enter — всегда строка, отправка — кнопкой
+      if (e.shiftKey || e.ctrlKey || e.metaKey || e.altKey || coarse) newline();
       else onSubmit();
       return;
     }
