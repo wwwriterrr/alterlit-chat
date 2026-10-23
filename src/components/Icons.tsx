@@ -49,6 +49,9 @@ export const IconMoon = (p: P) => (
 export const IconLogout = (p: P) => (
   <svg {...base} {...p}><path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3M10 16l-4-4 4-4M6 12h10" /></svg>
 );
+export const IconHome = (p: P) => (
+  <svg {...base} {...p}><path d="M4 10.5 12 4l8 6.5V19a1 1 0 0 1-1 1h-4.5v-5.5h-5V20H5a1 1 0 0 1-1-1Z" /></svg>
+);
 export const IconPalette = (p: P) => (
   <svg {...base} {...p}><path d="M12 3a9 9 0 1 0 0 18c1 0 1.7-.7 1.7-1.6 0-.5-.2-.9-.5-1.2a1.7 1.7 0 0 1 1.3-2.9H17a4 4 0 0 0 4-4C21 6.7 17 3 12 3Z" /><circle cx="7.5" cy="11.5" r=".9" /><circle cx="9.5" cy="7.5" r=".9" /><circle cx="14.5" cy="7.5" r=".9" /></svg>
 );

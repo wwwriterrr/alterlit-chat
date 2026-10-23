@@ -3,7 +3,7 @@ import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { openPanel } from '../store/uiSlice';
 import { logoutUrl } from '../utils/people';
 import Avatar from './Avatar';
-import { IconBlock, IconLogout, IconMenu, IconPalette } from './Icons';
+import { IconBlock, IconHome, IconLogout, IconMenu, IconPalette } from './Icons';
 import s from './MainMenu.module.css';
 
 export default function MainMenu() {
@@ -62,6 +62,10 @@ export default function MainMenu() {
             <IconBlock width={20} height={20} />
             Заблокированные
           </button>
+          <a role="menuitem" className={s.item} href="https://alterlit.ru">
+            <IconHome width={20} height={20} />
+            На Альтерлит
+          </a>
           <a role="menuitem" className={`${s.item} ${s.danger}`} href={logoutUrl()}>
             <IconLogout width={20} height={20} />
             Выйти из аккаунта
