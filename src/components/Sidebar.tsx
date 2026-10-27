@@ -14,7 +14,7 @@ import { displayName } from '../store/usersSlice';
 import { plainText } from '../utils/html';
 import { peerIdOf } from '../utils/people';
 import { CHATS, plural } from '../utils/plural';
-import { IconCheck, IconClose, IconEdit, IconSearch, IconSelect, IconTrash } from './Icons';
+import { IconArrowOut, IconCheck, IconClose, IconEdit, IconSearch, IconSelect, IconTrash, LogoMark } from './Icons';
 import AppearancePanel from './AppearancePanel';
 import BlacklistPanel from './BlacklistPanel';
 import NewChatPanel from './NewChatPanel';
@@ -134,6 +134,20 @@ export default function Sidebar() {
             </label>
           )}
         </header>
+      )}
+
+      {!selecting && (
+        // не чат, а выход на сайт: квадратный знак вместо круглой аватарки, рамка и стрелка
+        <a className={s.home} href="https://alterlit.ru">
+          <span className={s.homeLogo}>
+            <LogoMark height={34} />
+          </span>
+          <span className={s.homeText}>
+            <span className={s.homeTitle}>Alterlit | главная</span>
+            <span className={s.homeSub}>Вернуться на сайт</span>
+          </span>
+          <IconArrowOut className={s.homeArrow} width={20} height={20} />
+        </a>
       )}
 
       <nav className={s.list} aria-label="Диалоги" ref={navRef}>

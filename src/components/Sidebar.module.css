@@ -216,3 +216,65 @@
   opacity: 0.45;
   cursor: default;
 }
+
+/* ссылка на сайт над списком чатов — выглядит как кнопка, а не как диалог */
+.home {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 8px 6px;
+  padding: 8px 12px 8px 8px;
+  border: 1.5px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface);
+  color: var(--text);
+  text-decoration: none;
+  transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+}
+.home:hover {
+  border-color: var(--accent);
+  background: var(--surface-2);
+}
+.home:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+.homeLogo {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  /* квадрат со скруглением — у чатов аватарки круглые */
+  border-radius: 12px;
+  background: #254f23;
+}
+.homeText {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.homeTitle {
+  font-weight: 700;
+  font-size: 1rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.homeSub {
+  font-family: var(--sans);
+  font-size: 0.8125rem;
+  color: var(--text-2);
+}
+.homeArrow {
+  flex: none;
+  color: var(--text-3);
+  transition: color 0.15s, transform 0.15s;
+}
+.home:hover .homeArrow {
+  color: var(--accent);
+  transform: translate(2px, -2px);
+}
